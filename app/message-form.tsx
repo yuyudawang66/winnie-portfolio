@@ -1,0 +1,2 @@
+import {ArrowUpRight,LockKeyhole} from 'lucide-react';
+export default function MessageForm(){return <div className="note-form"><div className="note-intro"><span className="note-tape"/><p>想聊聊设计，或是简单打个招呼？<br/>把想说的话，留在这里吧。</p><LockKeyhole size={18}/></div><p>点击下方按钮进入留言工作室，再点墙上的彩色便签，就能给我寄一张小纸条。</p><div className="note-meta"><span><LockKeyhole size={12}/>留言仅 Winnie 可见，不会公开展示</span></div><a className="primary-button" href="https://winnie-design-studio.yangwenru31.chatgpt.site/" target="_blank" rel="noopener noreferrer">前往私密留言 <ArrowUpRight size={17}/></a></div>}

@@ -1,0 +1,455 @@
+{
+  "ip": [
+    {
+      "src": "./assets/projects/ip/01.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/02.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/03.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/04.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/05.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/06.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/07.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/08.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/09.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/10.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/11.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/12.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/13.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/14.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/15.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/16.webp",
+      "width": 1161,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/ip/17.webp",
+      "width": 1161,
+      "height": 768
+    }
+  ],
+  "campaign": [
+    {
+      "src": "./assets/projects/campaign/01.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/02.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/03.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/04.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/05.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/06.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/07.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/08.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/09.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/10.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/11.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/12.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/13.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/14.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/15.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/16.webp",
+      "width": 1452,
+      "height": 2000
+    },
+    {
+      "src": "./assets/projects/campaign/17.webp",
+      "width": 1452,
+      "height": 768
+    }
+  ],
+  "ui": [
+    {
+      "src": "./assets/projects/ui/01.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/ui/02.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/ui/03.webp",
+      "width": 1800,
+      "height": 3286
+    },
+    {
+      "src": "./assets/projects/ui/04.webp",
+      "width": 1800,
+      "height": 1279
+    },
+    {
+      "src": "./assets/projects/ui/05.webp",
+      "width": 1800,
+      "height": 1545
+    },
+    {
+      "src": "./assets/projects/ui/06.webp",
+      "width": 1800,
+      "height": 1813
+    },
+    {
+      "src": "./assets/projects/ui/07.webp",
+      "width": 1800,
+      "height": 1401
+    },
+    {
+      "src": "./assets/projects/ui/08.webp",
+      "width": 1800,
+      "height": 2715
+    },
+    {
+      "src": "./assets/projects/ui/09.webp",
+      "width": 1800,
+      "height": 1430
+    },
+    {
+      "src": "./assets/projects/ui/10.webp",
+      "width": 1800,
+      "height": 2013
+    },
+    {
+      "src": "./assets/projects/ui/11.webp",
+      "width": 1800,
+      "height": 1299
+    },
+    {
+      "src": "./assets/projects/ui/12.webp",
+      "width": 1800,
+      "height": 1588
+    },
+    {
+      "src": "./assets/projects/ui/13.webp",
+      "width": 1800,
+      "height": 2747
+    },
+    {
+      "src": "./assets/projects/ui/14.webp",
+      "width": 1800,
+      "height": 1553
+    },
+    {
+      "src": "./assets/projects/ui/15.webp",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "src": "./assets/projects/ui/17.webp",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "src": "./assets/projects/ui/18.webp",
+      "width": 1800,
+      "height": 1742
+    },
+    {
+      "src": "./assets/projects/ui/19.webp",
+      "width": 1800,
+      "height": 2899
+    },
+    {
+      "src": "./assets/projects/ui/20.webp",
+      "width": 1800,
+      "height": 2070
+    },
+    {
+      "src": "./assets/projects/ui/21.webp",
+      "width": 1800,
+      "height": 1994
+    },
+    {
+      "src": "./assets/projects/ui/23.webp",
+      "width": 1800,
+      "height": 3469
+    },
+    {
+      "src": "./assets/projects/ui/24.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/ui/25.webp",
+      "width": 1800,
+      "height": 4423
+    },
+    {
+      "src": "./assets/projects/ui/26.webp",
+      "width": 1800,
+      "height": 1218
+    },
+    {
+      "src": "./assets/projects/ui/27.webp",
+      "width": 1800,
+      "height": 3544
+    },
+    {
+      "src": "./assets/projects/ui/28.webp",
+      "width": 1800,
+      "height": 1385
+    }
+  ],
+  "brand": [
+    {
+      "src": "./assets/projects/brand/01.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/02.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/03.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/04.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/05.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/06.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/07.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/08.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/09.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/10.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/11.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/12.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/13.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/14.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/15.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/16.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/17.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/18.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/19.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/20.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/21.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/22.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/23.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/24.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/25.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/26.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/27.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/28.webp",
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "src": "./assets/projects/brand/29.webp",
+      "width": 1800,
+      "height": 1013
+    }
+  ]
+}
