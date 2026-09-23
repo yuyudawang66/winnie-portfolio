@@ -21,6 +21,10 @@
 .prototype-phone{position:relative;box-sizing:content-box;width:min(calc(100% - 16px),284px,calc((100svh - 240px)*.462));aspect-ratio:375/812;background:#fff}
 .prototype-phone iframe{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;transform:scale(1.71);transform-origin:center}
 @media(max-width:1000px){.prototype-phone{width:min(calc(100% - 16px),284px)}}
+/* The touch/mobile Figma player already fills its viewport. Desktop-only
+   padding compensation would crop its content, so keep touch screens at 1:1. */
+@media (hover:none) and (pointer:coarse){.prototype-phone iframe{transform:none}}
+@media(max-width:700px){.prototype-phone iframe{transform:none}}
 
 .about-photo{position:relative;overflow:hidden}.about-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 38%;display:block}
 
