@@ -16,20 +16,20 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   // A failed image must not leave the visitor trapped on the welcome screen.
   const loadingDeadline=window.setTimeout(()=>{assetsLoaded=true;finishLoading();},8000);
   state.current.onProgress(12);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
   el.appendChild(renderer.domElement);renderer.domElement.setAttribute('aria-label','可旋转的三维储物柜，点击柜门打开');
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.1,100);
   camera.position.set(-4,2.7,10);const controls=new OrbitControls(camera,renderer.domElement);
   controls.target.set(0,.05,0);controls.enableDamping=true;controls.enablePan=false;controls.enableZoom=false;
   controls.minAzimuthAngle=-.75;controls.maxAzimuthAngle=.55;controls.minPolarAngle=1.08;controls.maxPolarAngle=1.65;
-  scene.add(new THREE.HemisphereLight(0xf5fcff,0x89a9b6,1.7));
-  const sun=new THREE.DirectionalLight(0xfff6e9,3);sun.position.set(-3,7,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+  scene.add(new THREE.HemisphereLight(0xffffff,0xbfe2f0,1.75));
+  const sun=new THREE.DirectionalLight(0xffffff,3.15);sun.position.set(-3,7,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
   Object.assign(sun.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:.1,far:20});sun.shadow.normalBias=.025;sun.shadow.bias=-.0002;sun.shadow.radius=4;scene.add(sun);
-  const rim=new THREE.DirectionalLight(0xd2f0ff,1.5);rim.position.set(4,2,-3);scene.add(rim);
+  const rim=new THREE.DirectionalLight(0xd9f7ff,1.8);rim.position.set(4,2,-3);scene.add(rim);
   const cabinet=new THREE.Group();scene.add(cabinet);
-  const mat=(color:string,metalness=.12,roughness=.48)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
-  const blue=mat('#a4cbdc'),edge=mat('#91b9cf'),inside=mat('#659ab9'),doorMat=mat('#d1e4ec'),silver=mat('#a3b2b8',.78,.24),cream=mat('#fff5dc',0,.85);
+  const mat=(color:string,metalness=.02,roughness=.38,glow=.045)=>new THREE.MeshStandardMaterial({color,metalness,roughness,emissive:color,emissiveIntensity:glow});
+  const blue=mat('#a9d9f0',0,.36,.07),edge=mat('#539bc4',0,.4,.055),inside=mat('#4f94c0',0,.46,.04),doorMat=mat('#cfe8f6',0,.34,.075),silver=mat('#8fa8b4',.48,.32,0),cream=mat('#fff5dc',0,.85,.03);
   function box(parent:THREE.Object3D,w:number,h:number,d:number,x:number,y:number,z:number,m:THREE.Material,r=.025){const mesh=new THREE.Mesh(new RoundedBoxGeometry(w,h,d,3,Math.min(r,w/3,h/3,d/3)),m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
   function label(parent:THREE.Object3D,text:string,w:number,h:number,x:number,y:number,z:number,bg='#fff9e9',color='#356b83',size=60){
    const c=document.createElement('canvas');c.width=768;c.height=Math.round(768*h/w);const ctx=c.getContext('2d')!;ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`600 ${size}px Georgia, "PingFang SC", sans-serif`;const lines=text.split('\n');lines.forEach((s,i)=>ctx.fillText(s,c.width/2,c.height/2+(i-(lines.length-1)/2)*size*1.45,c.width-55));const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,roughness:.92}));plane.position.set(x,y,z);parent.add(plane);return plane;
@@ -80,7 +80,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   let mobile=false,entranceTime:number|null=null,entranceFinished=state.current.entrance==='ready';
   const direction=new THREE.Vector3(-4,2.65,10).normalize();
   const resize=()=>{const {width,height}=el.getBoundingClientRect();if(!width||!height)return;mobile=width<650;renderer.setSize(width,height);
-   if(entranceFinished)camera.position.sub(controls.target).normalize().multiplyScalar(mobile?6.6:8.8).add(controls.target);
+   if(entranceFinished)camera.position.sub(controls.target).normalize().multiplyScalar(mobile?6.35:7.9).add(controls.target);
    camera.aspect=width/height;camera.fov=mobile?44:35;camera.updateProjectionMatrix();};const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let last=performance.now();
   controls.enabled=entranceFinished;
@@ -90,7 +90,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
     if(state.current.entrance==='entering'&&entranceTime===null)entranceTime=now;
     const t=state.current.entrance==='ready'||reduced?1:entranceTime===null?0:Math.min(1,Math.max(0,(now-entranceTime-180)/1900));
     // Quintic easing brings a genuine perspective-camera dolly to a soft stop.
-    const ease=t*t*t*(t*(t*6-15)+10),distance=(mobile?6.6:8.8)*(2.6-1.6*ease);
+    const ease=t*t*t*(t*(t*6-15)+10),distance=(mobile?6.35:7.9)*(2.6-1.6*ease);
     camera.position.copy(direction).multiplyScalar(distance).add(controls.target);camera.lookAt(controls.target);
     if(t===1&&state.current.entrance!=='loading'){entranceFinished=true;controls.enabled=true;state.current.onEntered();}
    }
