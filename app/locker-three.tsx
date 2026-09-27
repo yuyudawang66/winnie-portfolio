@@ -4,13 +4,18 @@ import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
 // Real, independently modelled surfaces: the shelves, door hinge and objects share world space.
-export default function LockerThree({open,onOpen,onExplore}:{open:boolean;onOpen:()=>void;onExplore:(id:string)=>void}){
- const host=useRef<HTMLDivElement>(null), state=useRef({open,onOpen,onExplore});
- const[failed,setFailed]=useState(false); state.current={open,onOpen,onExplore};
+export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,onReady,onEntered}:{open:boolean;onOpen:()=>void;onExplore:(id:string)=>void;entrance:'loading'|'entering'|'ready';onProgress:(value:number)=>void;onReady:()=>void;onEntered:()=>void}){
+ const host=useRef<HTMLDivElement>(null), state=useRef({open,onOpen,onExplore,entrance,onProgress,onReady,onEntered});
+ const[failed,setFailed]=useState(false); state.current={open,onOpen,onExplore,entrance,onProgress,onReady,onEntered};
  useEffect(()=>{
   const el=host.current!; let renderer:THREE.WebGLRenderer;
-  try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch{setFailed(true);return;}
-  let disposed=false;const textures:THREE.Texture[]=[];
+  try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch{setFailed(true);state.current.onProgress(100);state.current.onReady();state.current.onEntered();return;}
+  let disposed=false,assetsLoaded=false,firstFrame=false,readySent=false;const textures:THREE.Texture[]=[];
+  const finishLoading=()=>{if(!disposed&&!readySent&&assetsLoaded&&firstFrame){readySent=true;state.current.onProgress(100);state.current.onReady();}};
+  const manager=new THREE.LoadingManager();manager.onProgress=(_,loaded,total)=>{if(!disposed)state.current.onProgress(60+Math.round(loaded/total*25));};manager.onLoad=()=>{assetsLoaded=true;finishLoading();};
+  // A failed image must not leave the visitor trapped on the welcome screen.
+  const loadingDeadline=window.setTimeout(()=>{assetsLoaded=true;finishLoading();},8000);
+  state.current.onProgress(12);
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   el.appendChild(renderer.domElement);renderer.domElement.setAttribute('aria-label','可旋转的三维储物柜，点击柜门打开');
@@ -30,7 +35,7 @@ export default function LockerThree({open,onOpen,onExplore}:{open:boolean;onOpen
    const c=document.createElement('canvas');c.width=768;c.height=Math.round(768*h/w);const ctx=c.getContext('2d')!;ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`600 ${size}px Georgia, "PingFang SC", sans-serif`;const lines=text.split('\n');lines.forEach((s,i)=>ctx.fillText(s,c.width/2,c.height/2+(i-(lines.length-1)/2)*size*1.45,c.width-55));const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,roughness:.92}));plane.position.set(x,y,z);parent.add(plane);return plane;
   }
   function picture(parent:THREE.Object3D,path:string,w:number,h:number,x:number,y:number,z:number){
-   const tex=new THREE.TextureLoader().load(path,()=>{if(disposed)tex.dispose();});tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.8}));m.position.set(x,y,z);parent.add(m);return m;
+   const tex=new THREE.TextureLoader(manager).load(path,()=>{if(disposed)tex.dispose();});tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.8}));m.position.set(x,y,z);parent.add(m);return m;
   }
   function action(obj:THREE.Object3D,id:string){obj.userData.action=id;return obj;}
   // Sheet metal shell, recessed back, dividers, top lip and individual feet.
@@ -68,14 +73,32 @@ export default function LockerThree({open,onOpen,onExplore}:{open:boolean;onOpen
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.14}));floor.rotation.x=-Math.PI/2;floor.position.y=-2.12;floor.receiveShadow=true;scene.add(floor);
   const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
   function hit(e:PointerEvent){const r=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);const nearest=ray.intersectObject(cabinet,true)[0];let obj:THREE.Object3D| null=nearest?.object??null;while(obj&&!obj.userData.action)obj=obj.parent;return obj?.userData.action as string|undefined;}
-  let down=[0,0];const onDown=(e:PointerEvent)=>{down=[e.clientX,e.clientY]};const onUp=(e:PointerEvent)=>{if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>7)return;const id=hit(e);if(id==='open')state.current.onOpen();else if(id?.startsWith('project/'))location.hash=id;else if(id)state.current.onExplore(id);};
+  let down=[0,0];const onDown=(e:PointerEvent)=>{down=[e.clientX,e.clientY]};const onUp=(e:PointerEvent)=>{if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>7)return;if(state.current.entrance!=='ready')return;const id=hit(e);if(id==='open')state.current.onOpen();else if(id?.startsWith('project/'))location.hash=id;else if(id)state.current.onExplore(id);};
   const onMove=(e:PointerEvent)=>{renderer.domElement.style.cursor=hit(e)?'pointer':'grab'};
   renderer.domElement.addEventListener('pointerdown',onDown);renderer.domElement.addEventListener('pointerup',onUp);renderer.domElement.addEventListener('pointermove',onMove);
-  let mobile=false;const resize=()=>{const {width,height}=el.getBoundingClientRect();if(!width||!height)return;mobile=width<650;renderer.setSize(width,height);camera.position.sub(controls.target).normalize().multiplyScalar(mobile?6.6:8.8).add(controls.target);camera.aspect=width/height;camera.fov=mobile?44:35;camera.updateProjectionMatrix();};const ro=new ResizeObserver(resize);ro.observe(el);resize();
+  state.current.onProgress(60);
+  let mobile=false,entranceTime:number|null=null,entranceFinished=state.current.entrance==='ready';
+  const direction=new THREE.Vector3(-4,2.65,10).normalize();
+  const resize=()=>{const {width,height}=el.getBoundingClientRect();if(!width||!height)return;mobile=width<650;renderer.setSize(width,height);
+   if(entranceFinished)camera.position.sub(controls.target).normalize().multiplyScalar(mobile?6.6:8.8).add(controls.target);
+   camera.aspect=width/height;camera.fov=mobile?44:35;camera.updateProjectionMatrix();};const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let last=performance.now();
-  renderer.setAnimationLoop((now)=>{const dt=Math.min((now-last)/1000,.05);last=now;const target=state.current.open?2.05:0;hinge.rotation.y=THREE.MathUtils.damp(hinge.rotation.y,target,reduced?100:5,dt);const scale=mobile?.84:1;cabinet.scale.setScalar(scale);cabinet.position.y=mobile?-.3:0;controls.update();renderer.render(scene,camera);});
-  const loss=(e:Event)=>{e.preventDefault();setFailed(true);};renderer.domElement.addEventListener('webglcontextlost',loss);
-  return()=>{disposed=true;ro.disconnect();renderer.setAnimationLoop(null);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('webglcontextlost',loss);scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});textures.forEach(t=>t.dispose());renderer.dispose();renderer.domElement.remove();};
+  controls.enabled=entranceFinished;
+  renderer.setAnimationLoop((now)=>{
+   const dt=Math.min((now-last)/1000,.05);last=now;
+   if(!entranceFinished){
+    if(state.current.entrance==='entering'&&entranceTime===null)entranceTime=now;
+    const t=state.current.entrance==='ready'||reduced?1:entranceTime===null?0:Math.min(1,Math.max(0,(now-entranceTime-180)/1900));
+    // Quintic easing brings a genuine perspective-camera dolly to a soft stop.
+    const ease=t*t*t*(t*(t*6-15)+10),distance=(mobile?6.6:8.8)*(2.6-1.6*ease);
+    camera.position.copy(direction).multiplyScalar(distance).add(controls.target);camera.lookAt(controls.target);
+    if(t===1&&state.current.entrance!=='loading'){entranceFinished=true;controls.enabled=true;state.current.onEntered();}
+   }
+   const target=state.current.open?2.05:0;hinge.rotation.y=THREE.MathUtils.damp(hinge.rotation.y,target,reduced?100:5,dt);const scale=mobile?.84:1;cabinet.scale.setScalar(scale);cabinet.position.y=mobile?-.3:0;controls.update();renderer.render(scene,camera);
+   if(!firstFrame){firstFrame=true;finishLoading();}
+  });
+  const loss=(e:Event)=>{e.preventDefault();setFailed(true);state.current.onEntered();};renderer.domElement.addEventListener('webglcontextlost',loss);
+  return()=>{disposed=true;clearTimeout(loadingDeadline);ro.disconnect();renderer.setAnimationLoop(null);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('webglcontextlost',loss);scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});textures.forEach(t=>t.dispose());renderer.dispose();renderer.domElement.remove();};
  },[]);
  return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}<span className="locker-3d-caption">拖动旋转视角 · 点击柜门开启</span></div>;
 }
