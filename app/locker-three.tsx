@@ -37,6 +37,11 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   function picture(parent:THREE.Object3D,path:string,w:number,h:number,x:number,y:number,z:number){
    const tex=new THREE.TextureLoader(manager).load(path,()=>{if(disposed)tex.dispose();});tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.8}));m.position.set(x,y,z);parent.add(m);return m;
   }
+  function sticker(parent:THREE.Object3D,path:string,w:number,h:number,x:number,y:number,z:number,rz=0){
+   const tex=new THREE.TextureLoader(manager).load(path,()=>{if(disposed)tex.dispose();});tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);
+   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.74,alphaTest:.02}));
+   mesh.position.set(x,y,z);mesh.rotation.z=rz;mesh.castShadow=true;parent.add(mesh);return mesh;
+  }
   function action(obj:THREE.Object3D,id:string){obj.userData.action=id;return obj;}
   // Sheet metal shell, recessed back, dividers, top lip and individual feet.
   box(cabinet,4.65,3.65,.10,0,0,-.43,inside);
@@ -56,16 +61,21 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   function vent(parent:THREE.Object3D,x:number,y:number,z:number){for(let j=0;j<4;j++){box(parent,.43,.052,.033,x,y-j*.085,z,edge,.023);box(parent,.42,.026,.04,x,y-j*.085+.014,z+.009,doorMat,.01);}}
   function handle(parent:THREE.Object3D,x:number,z:number){box(parent,.16,.48,.045,x,-.13,z,silver,.045);box(parent,.055,.28,.10,x,-.12,z+.053,edge,.024);}
   [-1.64,1.64].forEach((x,i)=>{box(cabinet,1.28,3.62,.08,x,0,.46,doorMat,.04);vent(cabinet,x,1.51,.52);vent(cabinet,x,-1.35,.52);handle(cabinet,x-.45,.52);label(cabinet,`0${i===0?1:3} / WINNIE`,.77,.08,x,1.71,.511,'#d1e4ec','#567f93',45);});
-  const photo=action(new THREE.Group(),'about');photo.position.set(-1.58,.33,.53);photo.rotation.z=-.09;cabinet.add(photo);box(photo,.86,1.08,.025,0,0,0,cream);picture(photo,'./assets/winnie-cherry-blossom.jpg',.72,.87,0,.05,.017);label(photo,'hello, it’s me!',.72,.12,0,-.46,.017,'#fff9e9','#527783',65);
-  label(cabinet,'collect\nlittle joys.',.7,.44,-1.59,-.76,.514,'#f7e8be','#688290',80);
-  const sticker=action(new THREE.Group(),'works');sticker.position.set(1.63,.55,.525);sticker.rotation.z=.06;cabinet.add(sticker);box(sticker,.92,.62,.02,0,0,0,cream);label(sticker,'DESIGN IS A\nPLAYGROUND',.86,.55,0,0,.015,'#fff9e9','#c28a56',71);
-  const envelope=action(new THREE.Group(),'message');envelope.position.set(1.64,-.47,.53);envelope.rotation.z=-.06;cabinet.add(envelope);box(envelope,.84,.52,.027,0,0,0,cream);label(envelope,'TO: WINNIE\n给我留言 ↗',.78,.44,0,0,.019,'#fff9e9','#438292',64);
+  const photo=action(new THREE.Group(),'about');photo.position.set(-1.57,.42,.54);photo.rotation.z=-.08;cabinet.add(photo);sticker(photo,'./assets/stickers/name-note.png',.9,.67,0,0,.02,0);
+  sticker(cabinet,'./assets/stickers/cat-shark-baby.png',.44,.53,-1.92,-.47,.55,.12);
+  sticker(cabinet,'./assets/stickers/tomato.png',.5,.44,-1.31,-.78,.55,-.12);
+  sticker(cabinet,'./assets/stickers/cat-matcha.png',.4,.36,-1.38,-.04,.55,.1);
+  const worksSticker=action(new THREE.Group(),'works');worksSticker.position.set(1.59,.68,.54);worksSticker.rotation.z=.08;cabinet.add(worksSticker);sticker(worksSticker,'./assets/stickers/camera.png',.74,.65,0,0,.02,0);
+  sticker(cabinet,'./assets/stickers/bulb.png',.48,.5,1.94,.12,.55,-.1);
+  sticker(cabinet,'./assets/stickers/bird.png',.42,.47,1.33,-.38,.55,.08);
+  const envelope=action(new THREE.Group(),'message');envelope.position.set(1.78,-.67,.55);envelope.rotation.z=-.08;cabinet.add(envelope);sticker(envelope,'./assets/stickers/cat-flower-wink.png',.48,.52,0,0,.015,0);
   // Door uses its actual edge as the pivot, including thickness and metal hinges.
   const hinge=action(new THREE.Group(),'open');hinge.position.set(.92,0,.5);cabinet.add(hinge);
   box(hinge,1.8,3.61,.085,-.9,0,0,doorMat,.04);vent(hinge,-.9,1.5,.06);vent(hinge,-.9,-1.35,.06);handle(hinge,-1.58,.06);
-  const poster=box(hinge,1.3,1.62,.014,-.86,.2,.052,cream,.003);poster.rotation.z=-.035;
-  label(hinge,'W.',1.12,.92,-.86,.39,.067,'#fff9e9','#498b9f',380);label(hinge,'WINNIE’S\nLITTLE CABINET',1.12,.36,-.86,-.25,.067,'#fff9e9','#5d8290',57);
-  label(hinge,'点击打开 · OPEN ME ↗',1.4,.16,-.87,-.92,.066,'#d1e4ec','#426a7d',55);
+  sticker(hinge,'./assets/stickers/portfolio-type.png',1.46,.64,-.88,.62,.065,-.035);
+  sticker(hinge,'./assets/stickers/hi.png',.82,.55,-1.08,-.12,.068,.1);
+  sticker(hinge,'./assets/stickers/cat-whiskers.png',.5,.45,-.45,-.46,.071,-.08);
+  sticker(hinge,'./assets/stickers/cat-glasses-flower.png',.5,.49,-1.16,-1.02,.069,.05);
   const back=label(hinge,'ideas\nlive here.',1.17,1.1,-.9,.4,-.05,'#fff0c9','#5096a5',115);back.rotation.y=Math.PI;
   [-1.28,1.28].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.22,20),silver);c.position.set(.93,y,.5);c.castShadow=true;cabinet.add(c);});
   // A soft contact texture supplements the directional shadow without a background image.
