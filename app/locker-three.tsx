@@ -37,11 +37,15 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   function picture(parent:THREE.Object3D,path:string,w:number,h:number,x:number,y:number,z:number){
    const tex=new THREE.TextureLoader(manager).load(path,()=>{if(disposed)tex.dispose();});tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.8}));m.position.set(x,y,z);parent.add(m);return m;
   }
-  function sticker(parent:THREE.Object3D,path:string,w:number,h:number,x:number,y:number,z:number,rz=0){
+  function sticker(parent:THREE.Object3D,path:string,w:number,h:number,x:number,y:number,z:number,rz=0,tile?:number){
    const tex=new THREE.TextureLoader(manager).load(path,()=>{if(disposed)tex.dispose();});tex.colorSpace=THREE.SRGBColorSpace;textures.push(tex);
+   tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+   // Each cat occupies one square of the transparent 2 × 2 atlas.
+   if(tile!==undefined){tex.repeat.set(.5,.5);tex.offset.set((tile%2)*.5,tile<2?.5:0);}
    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.74,alphaTest:.02}));
    mesh.position.set(x,y,z);mesh.rotation.z=rz;mesh.castShadow=true;parent.add(mesh);return mesh;
   }
+  function catSticker(parent:THREE.Object3D,tile:number,size:number,x:number,y:number,z:number,rz=0){return sticker(parent,'./assets/stickers/cats-cutout-atlas.png',size,size,x,y,z,rz,tile);}
   function action(obj:THREE.Object3D,id:string){obj.userData.action=id;return obj;}
   // Sheet metal shell, recessed back, dividers, top lip and individual feet.
   box(cabinet,4.65,3.65,.10,0,0,-.43,inside);
@@ -61,21 +65,19 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   function vent(parent:THREE.Object3D,x:number,y:number,z:number){for(let j=0;j<4;j++){box(parent,.43,.052,.033,x,y-j*.085,z,edge,.023);box(parent,.42,.026,.04,x,y-j*.085+.014,z+.009,doorMat,.01);}}
   function handle(parent:THREE.Object3D,x:number,z:number){box(parent,.16,.48,.045,x,-.13,z,silver,.045);box(parent,.055,.28,.10,x,-.12,z+.053,edge,.024);}
   [-1.64,1.64].forEach((x,i)=>{box(cabinet,1.28,3.62,.08,x,0,.46,doorMat,.04);vent(cabinet,x,1.51,.52);vent(cabinet,x,-1.35,.52);handle(cabinet,x-.45,.52);label(cabinet,`0${i===0?1:3} / WINNIE`,.77,.08,x,1.71,.511,'#d1e4ec','#567f93',45);});
-  const photo=action(new THREE.Group(),'about');photo.position.set(-1.57,.42,.54);photo.rotation.z=-.08;cabinet.add(photo);sticker(photo,'./assets/stickers/name-note.png',.9,.67,0,0,.02,0);
-  sticker(cabinet,'./assets/stickers/cat-shark-baby.png',.44,.53,-1.92,-.47,.55,.12);
-  sticker(cabinet,'./assets/stickers/tomato.png',.5,.44,-1.31,-.78,.55,-.12);
-  sticker(cabinet,'./assets/stickers/cat-matcha.png',.4,.36,-1.38,-.04,.55,.1);
-  const worksSticker=action(new THREE.Group(),'works');worksSticker.position.set(1.59,.68,.54);worksSticker.rotation.z=.08;cabinet.add(worksSticker);sticker(worksSticker,'./assets/stickers/camera.png',.74,.65,0,0,.02,0);
-  sticker(cabinet,'./assets/stickers/bulb.png',.48,.5,1.94,.12,.55,-.1);
-  sticker(cabinet,'./assets/stickers/bird.png',.42,.47,1.33,-.38,.55,.08);
-  const envelope=action(new THREE.Group(),'message');envelope.position.set(1.78,-.67,.55);envelope.rotation.z=-.08;cabinet.add(envelope);sticker(envelope,'./assets/stickers/cat-flower-wink.png',.48,.52,0,0,.015,0);
+  // The user's two layouts stay intact; only the cats are individual cutouts.
+  const photo=action(new THREE.Group(),'about');photo.position.set(-1.64,.65,.54);photo.rotation.z=-.025;cabinet.add(photo);sticker(photo,'./assets/stickers/about-full.webp',1.09,1.09*5562/5760,0,0,.02);
+  catSticker(cabinet,0,.59,-1.85,-.68,.55,.08);
+  catSticker(cabinet,1,.57,-1.29,-.82,.55,-.1);
+  const worksSticker=action(new THREE.Group(),'works');worksSticker.position.set(1.62,.65,.54);worksSticker.rotation.z=.08;cabinet.add(worksSticker);catSticker(worksSticker,2,.85,0,0,.02);
+  catSticker(cabinet,0,.46,1.94,-.05,.55,-.12);
+  const envelope=action(new THREE.Group(),'message');envelope.position.set(1.6,-.72,.55);envelope.rotation.z=-.08;cabinet.add(envelope);catSticker(envelope,1,.73,0,0,.015);
   // Door uses its actual edge as the pivot, including thickness and metal hinges.
   const hinge=action(new THREE.Group(),'open');hinge.position.set(.92,0,.5);cabinet.add(hinge);
   box(hinge,1.8,3.61,.085,-.9,0,0,doorMat,.04);vent(hinge,-.9,1.5,.06);vent(hinge,-.9,-1.35,.06);handle(hinge,-1.58,.06);
-  sticker(hinge,'./assets/stickers/portfolio-type.png',1.46,.64,-.88,.62,.065,-.035);
-  sticker(hinge,'./assets/stickers/hi.png',.82,.55,-1.08,-.12,.068,.1);
-  sticker(hinge,'./assets/stickers/cat-whiskers.png',.5,.45,-.45,-.46,.071,-.08);
-  sticker(hinge,'./assets/stickers/cat-glasses-flower.png',.5,.49,-1.16,-1.02,.069,.05);
+  sticker(hinge,'./assets/stickers/portfolio-cover-full.webp',1.62,1.62*1080/1920,-.9,.62,.065,-.035);
+  catSticker(hinge,3,.66,-.49,-.36,.071,-.08);
+  catSticker(hinge,2,.62,-1.12,-.86,.069,.06);
   const back=label(hinge,'ideas\nlive here.',1.17,1.1,-.9,.4,-.05,'#fff0c9','#5096a5',115);back.rotation.y=Math.PI;
   [-1.28,1.28].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.22,20),silver);c.position.set(.93,y,.5);c.castShadow=true;cabinet.add(c);});
   // A soft contact texture supplements the directional shadow without a background image.
