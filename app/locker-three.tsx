@@ -65,19 +65,15 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   function vent(parent:THREE.Object3D,x:number,y:number,z:number){for(let j=0;j<4;j++){box(parent,.43,.052,.033,x,y-j*.085,z,edge,.023);box(parent,.42,.026,.04,x,y-j*.085+.014,z+.009,doorMat,.01);}}
   function handle(parent:THREE.Object3D,x:number,z:number){box(parent,.16,.48,.045,x,-.13,z,silver,.045);box(parent,.055,.28,.10,x,-.12,z+.053,edge,.024);}
   [-1.64,1.64].forEach((x,i)=>{box(cabinet,1.28,3.62,.08,x,0,.46,doorMat,.04);vent(cabinet,x,1.51,.52);vent(cabinet,x,-1.35,.52);handle(cabinet,x-.45,.52);label(cabinet,`0${i===0?1:3} / WINNIE`,.77,.08,x,1.71,.511,'#d1e4ec','#567f93',45);});
-  // The user's two layouts stay intact; only the cats are individual cutouts.
-  const photo=action(new THREE.Group(),'about');photo.position.set(-1.64,.65,.54);photo.rotation.z=-.025;cabinet.add(photo);sticker(photo,'./assets/stickers/about-full.webp',1.09,1.09*5562/5760,0,0,.02);
-  catSticker(cabinet,0,.59,-1.85,-.68,.55,.08);
-  catSticker(cabinet,1,.57,-1.29,-.82,.55,-.1);
-  const worksSticker=action(new THREE.Group(),'works');worksSticker.position.set(1.62,.65,.54);worksSticker.rotation.z=.08;cabinet.add(worksSticker);catSticker(worksSticker,2,.85,0,0,.02);
-  catSticker(cabinet,0,.46,1.94,-.05,.55,-.12);
-  const envelope=action(new THREE.Group(),'message');envelope.position.set(1.6,-.72,.55);envelope.rotation.z=-.08;cabinet.add(envelope);catSticker(envelope,1,.73,0,0,.015);
+  // Four small cat decals, each used once across the cabinet.
+  const aboutSticker=action(new THREE.Group(),'about');aboutSticker.position.set(-1.48,.54,.54);aboutSticker.rotation.z=-.07;cabinet.add(aboutSticker);catSticker(aboutSticker,0,.39,0,0,.02);
+  const worksSticker=action(new THREE.Group(),'works');worksSticker.position.set(1.64,.63,.54);worksSticker.rotation.z=.08;cabinet.add(worksSticker);catSticker(worksSticker,2,.43,0,0,.02);
+  const envelope=action(new THREE.Group(),'message');envelope.position.set(1.72,-.65,.55);envelope.rotation.z=-.08;cabinet.add(envelope);catSticker(envelope,1,.39,0,0,.015);
   // Door uses its actual edge as the pivot, including thickness and metal hinges.
   const hinge=action(new THREE.Group(),'open');hinge.position.set(.92,0,.5);cabinet.add(hinge);
   box(hinge,1.8,3.61,.085,-.9,0,0,doorMat,.04);vent(hinge,-.9,1.5,.06);vent(hinge,-.9,-1.35,.06);handle(hinge,-1.58,.06);
   sticker(hinge,'./assets/stickers/portfolio-cover-full.webp',1.62,1.62*1080/1920,-.9,.62,.065,-.035);
-  catSticker(hinge,3,.66,-.49,-.36,.071,-.08);
-  catSticker(hinge,2,.62,-1.12,-.86,.069,.06);
+  catSticker(hinge,3,.38,-.65,-.54,.071,-.08);
   const back=label(hinge,'ideas\nlive here.',1.17,1.1,-.9,.4,-.05,'#fff0c9','#5096a5',115);back.rotation.y=Math.PI;
   [-1.28,1.28].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.22,20),silver);c.position.set(.93,y,.5);c.castShadow=true;cabinet.add(c);});
   // A soft contact texture supplements the directional shadow without a background image.
@@ -112,5 +108,5 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   const loss=(e:Event)=>{e.preventDefault();setFailed(true);state.current.onEntered();};renderer.domElement.addEventListener('webglcontextlost',loss);
   return()=>{disposed=true;clearTimeout(loadingDeadline);ro.disconnect();renderer.setAnimationLoop(null);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('webglcontextlost',loss);scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});textures.forEach(t=>t.dispose());renderer.dispose();renderer.domElement.remove();};
  },[]);
- return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}<span className="locker-3d-caption">拖动旋转视角 · 点击柜门开启</span></div>;
+ return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}</div>;
 }
