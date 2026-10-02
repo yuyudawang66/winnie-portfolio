@@ -2,11 +2,14 @@ import {useEffect,useRef,useState} from 'react';
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {createXuegaoBird} from './xuegao-bird';
 
 // Real, independently modelled surfaces: the shelves, door hinge and objects share world space.
 export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,onReady,onEntered}:{open:boolean;onOpen:()=>void;onExplore:(id:string)=>void;entrance:'loading'|'entering'|'ready';onProgress:(value:number)=>void;onReady:()=>void;onEntered:()=>void}){
  const host=useRef<HTMLDivElement>(null), state=useRef({open,onOpen,onExplore,entrance,onProgress,onReady,onEntered});
  const[failed,setFailed]=useState(false); state.current={open,onOpen,onExplore,entrance,onProgress,onReady,onEntered};
+ const[birdGreeting,setBirdGreeting]=useState(false);
+ const[birdAnchor,setBirdAnchor]=useState<{x:number;y:number;width:number;height:number}|null>(null);
  useEffect(()=>{
   const el=host.current!; let renderer:THREE.WebGLRenderer;
   try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch{setFailed(true);state.current.onProgress(100);state.current.onReady();state.current.onEntered();return;}
@@ -21,7 +24,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   el.appendChild(renderer.domElement);renderer.domElement.setAttribute('aria-label','可旋转的三维储物柜，点击柜门打开');
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.1,100);
   camera.position.set(-4,2.7,10);const controls=new OrbitControls(camera,renderer.domElement);
-  controls.target.set(0,.05,0);controls.enableDamping=true;controls.enablePan=false;controls.enableZoom=false;
+  controls.target.set(0,.35,0);controls.enableDamping=true;controls.enablePan=false;controls.enableZoom=false;
   controls.minAzimuthAngle=-.75;controls.maxAzimuthAngle=.55;controls.minPolarAngle=1.08;controls.maxPolarAngle=1.65;
   scene.add(new THREE.HemisphereLight(0xffffff,0xbfe2f0,1.75));
   const sun=new THREE.DirectionalLight(0xffffff,3.15);sun.position.set(-3,7,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
@@ -52,6 +55,12 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   [-2.32,-.95,.95,2.32].forEach(x=>box(cabinet,.075,3.8,.93,x,0,0,blue));
   [-1.9,1.9].forEach(y=>box(cabinet,4.72,.095,.99,0,y,0,blue));
   [-2.05,2.05].forEach(x=>[-.3,.3].forEach(z=>box(cabinet,.13,.18,.13,x,-2.02,z,edge)));
+  const xuegao=createXuegaoBird();xuegao.bird.position.set(.38,1.9475,.20);cabinet.add(xuegao.bird);
+  // Project a small accessible hover/tap target from the real bird's bounds.
+  // Its location follows cabinet scale, viewport changes and camera rotation.
+  const birdCorners:THREE.Vector3[]=[];
+  for(const x of [-.235,.235])for(const y of [0,.73])for(const z of [-.35,.27])birdCorners.push(new THREE.Vector3(x,y,z));
+  const projected=new THREE.Vector3();let previousAnchor='';
   // Shelf depth is visible when the door swings out.
   [1.03,-.2,-1.1].forEach(y=>box(cabinet,1.82,.055,.84,0,y,-.015,doorMat));
   const bookColors=['#cabee4','#fcdfb4','#fff8e4','#dfad99','#acd4cc','#e7bfcb'];
@@ -81,14 +90,14 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.14}));floor.rotation.x=-Math.PI/2;floor.position.y=-2.12;floor.receiveShadow=true;scene.add(floor);
   const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
   function hit(e:PointerEvent){const r=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);const nearest=ray.intersectObject(cabinet,true)[0];let obj:THREE.Object3D| null=nearest?.object??null;while(obj&&!obj.userData.action)obj=obj.parent;return obj?.userData.action as string|undefined;}
-  let down=[0,0];const onDown=(e:PointerEvent)=>{down=[e.clientX,e.clientY]};const onUp=(e:PointerEvent)=>{if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>7)return;if(state.current.entrance!=='ready')return;const id=hit(e);if(id==='open')state.current.onOpen();else if(id?.startsWith('project/'))location.hash=id;else if(id)state.current.onExplore(id);};
+  let down=[0,0];const onDown=(e:PointerEvent)=>{down=[e.clientX,e.clientY];setBirdGreeting(false);};const onUp=(e:PointerEvent)=>{if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>7)return;if(state.current.entrance!=='ready')return;const id=hit(e);if(id==='open')state.current.onOpen();else if(id?.startsWith('project/'))location.hash=id;else if(id)state.current.onExplore(id);};
   const onMove=(e:PointerEvent)=>{renderer.domElement.style.cursor=hit(e)?'pointer':'grab'};
   renderer.domElement.addEventListener('pointerdown',onDown);renderer.domElement.addEventListener('pointerup',onUp);renderer.domElement.addEventListener('pointermove',onMove);
   state.current.onProgress(60);
   let mobile=false,entranceTime:number|null=null,entranceFinished=state.current.entrance==='ready';
   const direction=new THREE.Vector3(-4,2.65,10).normalize();
-  const resize=()=>{const {width,height}=el.getBoundingClientRect();if(!width||!height)return;mobile=width<650;renderer.setSize(width,height);
-   if(entranceFinished)camera.position.sub(controls.target).normalize().multiplyScalar(mobile?6.35:7.9).add(controls.target);
+  const resize=()=>{const {width,height}=el.getBoundingClientRect();if(!width||!height)return;const viewDirection=camera.position.clone().sub(controls.target).normalize();mobile=width<650;renderer.setSize(width,height);controls.target.y=mobile?.05:.35;
+   if(entranceFinished)camera.position.copy(viewDirection).multiplyScalar(mobile?6.35:7.9).add(controls.target);
    camera.aspect=width/height;camera.fov=mobile?44:35;camera.updateProjectionMatrix();};const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let last=performance.now();
   controls.enabled=entranceFinished;
@@ -102,11 +111,19 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
     camera.position.copy(direction).multiplyScalar(distance).add(controls.target);camera.lookAt(controls.target);
     if(t===1&&state.current.entrance!=='loading'){entranceFinished=true;controls.enabled=true;state.current.onEntered();}
    }
+   xuegao.animate(now/1000,reduced);
    const target=state.current.open?2.05:0;hinge.rotation.y=THREE.MathUtils.damp(hinge.rotation.y,target,reduced?100:5,dt);const scale=mobile?.84:1;cabinet.scale.setScalar(scale);cabinet.position.y=mobile?-.3:0;controls.update();renderer.render(scene,camera);
+   if(entranceFinished){
+    const width=el.clientWidth,height=el.clientHeight;let left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
+    for(const corner of birdCorners){projected.copy(corner).applyMatrix4(xuegao.bird.matrixWorld).project(camera);const x=(projected.x+1)*width/2,y=(1-projected.y)*height/2;left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+    const w=Math.round(Math.max(44,right-left)),h=Math.round(Math.max(44,bottom-top));
+    const anchor={x:Math.round((left+right-w)/2),y:Math.round((top+bottom-h)/2),width:w,height:h},key=`${anchor.x},${anchor.y},${w},${h}`;
+    if(key!==previousAnchor){previousAnchor=key;setBirdAnchor(anchor);}
+   }
    if(!firstFrame){firstFrame=true;finishLoading();}
   });
   const loss=(e:Event)=>{e.preventDefault();setFailed(true);state.current.onEntered();};renderer.domElement.addEventListener('webglcontextlost',loss);
   return()=>{disposed=true;clearTimeout(loadingDeadline);ro.disconnect();renderer.setAnimationLoop(null);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('webglcontextlost',loss);scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});textures.forEach(t=>t.dispose());renderer.dispose();renderer.domElement.remove();};
  },[]);
- return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}</div>;
+ return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{!failed&&entrance==='ready'&&birdAnchor&&<button type="button" className="xuegao-trigger" style={{left:birdAnchor.x,top:birdAnchor.y,width:birdAnchor.width,height:birdAnchor.height}} aria-label="雪糕，紫伊莎牡丹鹦鹉" aria-describedby={birdGreeting?'xuegao-greeting':undefined} onPointerEnter={e=>{if(e.pointerType!=='touch')setBirdGreeting(true);}} onPointerLeave={e=>{if(e.pointerType!=='touch')setBirdGreeting(false);}} onFocus={()=>setBirdGreeting(true)} onBlur={()=>setBirdGreeting(false)} onClick={()=>setBirdGreeting(true)} onKeyDown={e=>{if(e.key==='Escape')setBirdGreeting(false);}}>{birdGreeting&&<span id="xuegao-greeting" className="xuegao-greeting" role="tooltip">你好我叫雪糕</span>}</button>}{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}</div>;
 }
