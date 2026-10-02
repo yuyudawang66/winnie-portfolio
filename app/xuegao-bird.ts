@@ -14,14 +14,19 @@ export function createXuegaoBird(){
   const mesh=new THREE.Mesh(sphereGeometry,m);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
  }
  const bodyGeometry=new THREE.SphereGeometry(1,64,48),positions=bodyGeometry.attributes.position;
- const colors=new Float32Array(positions.count*3),ivory=new THREE.Color('#f9f3e5'),violet=new THREE.Color('#b19bce'),color=new THREE.Color();
+ const colors=new Float32Array(positions.count*3),ivory=new THREE.Color('#f9f3e5'),violet=new THREE.Color('#b19bce'),blush=new THREE.Color('#e993a2'),color=new THREE.Color();
  for(let i=0;i<positions.count;i++){
   const x=positions.getX(i),y=positions.getY(i),z=positions.getZ(i);
   positions.setXYZ(i,x*.266*(1-.17*y),.256+y*.246,z*.224*(1-.1*y)+.018*(1-y*y));
   // White forehead and breast flow into a lavender back on the same surface.
   const back=1-THREE.MathUtils.smoothstep(z,-.38,.18);
   const belowHead=1-THREE.MathUtils.smoothstep(y,.30,.68);
-  color.copy(ivory).lerp(violet,back*belowHead);color.toArray(colors,i*3);
+  color.copy(ivory).lerp(violet,back*belowHead);
+  // Soft blush is part of the feather color, with no raised patches or edges.
+  const cheekX=(Math.abs(positions.getX(i))-.145)/.040;
+  const cheekY=(positions.getY(i)-.305)/.029;
+  const cheek=.64*Math.exp(-2*(cheekX*cheekX+cheekY*cheekY))*THREE.MathUtils.smoothstep(z,.25,.65);
+  color.lerp(blush,cheek);color.toArray(colors,i*3);
  }
  bodyGeometry.setAttribute('color',new THREE.BufferAttribute(colors,3));bodyGeometry.computeVertexNormals();
  const body=new THREE.Mesh(bodyGeometry,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.88,metalness:0}));body.castShadow=true;body.receiveShadow=true;plumage.add(body);
