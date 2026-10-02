@@ -47,6 +47,17 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
    mesh.position.set(x,y,z);mesh.rotation.z=rz;mesh.castShadow=true;parent.add(mesh);return mesh;
   }
   function action(obj:THREE.Object3D,id:string){obj.userData.action=id;return obj;}
+  const photoPaper=mat('#fffaf2',0,.94,0);
+  function polaroid(file:string,aspect:number,width:number,x:number,y:number,angle:number,z=.511){
+   const frame=new THREE.Group();frame.name=`Polaroid: ${file}`;frame.position.set(x,y,z);frame.rotation.z=angle;cabinet.add(frame);
+   // Keep every original image complete, with a narrow rim and a wider bottom.
+   const rim=.016,bottom=.066,photoWidth=width-rim*2,photoHeight=photoWidth/aspect;
+   box(frame,width,photoHeight+rim+bottom,.008,0,0,0,photoPaper,.002);
+   const texture=new THREE.TextureLoader(manager).load(`./assets/polaroids/${file}.png`,()=>{if(disposed)texture.dispose();});
+   texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(texture);
+   const photo=new THREE.Mesh(new THREE.PlaneGeometry(photoWidth,photoHeight),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));
+   photo.position.set(0,(bottom-rim)/2,.0046);frame.add(photo);
+  }
   // Sheet metal shell, recessed back, dividers, top lip and individual feet.
   box(cabinet,4.65,3.65,.10,0,0,-.43,inside);
   [-2.32,-.95,.95,2.32].forEach(x=>box(cabinet,.075,3.8,.93,x,0,0,blue));
@@ -73,6 +84,13 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   [-1.64,1.64].forEach((x,i)=>{box(cabinet,1.28,3.62,.08,x,0,.46,doorMat,.04);vent(cabinet,x,1.51,.52);vent(cabinet,x,-1.35,.52);handle(cabinet,x-.45,.52);label(cabinet,`0${i===0?1:3} / WINNIE`,.77,.08,x,1.71,.511,'#d1e4ec','#567f93',45);});
   // A single small portfolio sticker sits above the right-hand door handle.
   action(sticker(cabinet,'./assets/stickers/portfolio-cover-full.webp',.60,.60*1080/1920,1.64,.26,.521),'open');
+  // Six small paper prints follow the marked layout; only the top-left pair overlap.
+  polaroid('cat',1200/783,.31,-1.99,.79,.07);
+  polaroid('duck',1,.28,-1.79,.62,-.085,.525);
+  polaroid('egg-flowers',1200/1736,.27,-1.43,-.23,.055);
+  polaroid('sunset',928/1232,.28,1.56,.84,-.055);
+  polaroid('starry-night',1200/750,.32,1.99,-.32,.085);
+  polaroid('blossoms',279/445,.25,1.31,-.79,-.045);
   // Door uses its actual edge as the pivot, including thickness and metal hinges.
   const hinge=action(new THREE.Group(),'open');hinge.position.set(.92,0,.5);cabinet.add(hinge);
   box(hinge,1.8,3.61,.085,-.9,0,0,doorMat,.04);vent(hinge,-.9,1.5,.06);vent(hinge,-.9,-1.35,.06);handle(hinge,-1.58,.06);
