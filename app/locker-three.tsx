@@ -59,7 +59,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   // Project a small accessible hover/tap target from the real bird's bounds.
   // Its location follows cabinet scale, viewport changes and camera rotation.
   const birdCorners:THREE.Vector3[]=[];
-  for(const x of [-.28,.28])for(const y of [0,.65])for(const z of [-.29,.27])birdCorners.push(new THREE.Vector3(x,y,z));
+  for(const x of [-.28,.28])for(const y of [0,.55])for(const z of [-.35,.27])birdCorners.push(new THREE.Vector3(x,y,z));
   const projected=new THREE.Vector3();let previousAnchor='';
   // Shelf depth is visible when the door swings out.
   [1.03,-.2,-1.1].forEach(y=>box(cabinet,1.82,.055,.84,0,y,-.015,doorMat));
