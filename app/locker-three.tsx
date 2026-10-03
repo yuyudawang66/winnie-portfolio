@@ -48,15 +48,29 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   }
   function action(obj:THREE.Object3D,id:string){obj.userData.action=id;return obj;}
   const photoPaper=mat('#fffaf2',0,.94,0);
-  function polaroid(file:string,aspect:number,width:number,x:number,y:number,angle:number,z=.511){
+  function polaroid(file:string,aspect:number,width:number,x:number,y:number,angle:number,z=.520){
    const frame=new THREE.Group();frame.name=`Polaroid: ${file}`;frame.position.set(x,y,z);frame.rotation.z=angle;cabinet.add(frame);
-   // Keep every original image complete, with a narrow rim and a wider bottom.
-   const rim=.016,bottom=.066,photoWidth=width-rim*2,photoHeight=photoWidth/aspect;
-   box(frame,width,photoHeight+rim+bottom,.008,0,0,0,photoPaper,.002);
+   // Wider white borders and a rounded paper edge, keeping the complete image.
+   const rim=.027,bottom=.080,depth=.022,photoWidth=width-rim*2,photoHeight=photoWidth/aspect;
+   const height=photoHeight+rim+bottom;
+   box(frame,width,height,depth,0,0,0,photoPaper,.004);
+   // Thin paper is below the scene shadow bias, so add a soft local contact shadow.
+   // The lower-right offset matches the light above and to the left of the cabinet.
+   const padding=.060,shadowWidth=width+padding*2,shadowHeight=height+padding*2;
+   const canvas=document.createElement('canvas');canvas.width=256;canvas.height=Math.ceil(256*shadowHeight/shadowWidth);
+   const ctx=canvas.getContext('2d')!,pixels=canvas.width/shadowWidth;
+   const drawShadow=(blur:number,offsetX:number,offsetY:number,opacity:number)=>{
+    ctx.filter=`blur(${blur*pixels}px)`;ctx.fillStyle=`rgba(35,57,68,${opacity})`;
+    ctx.beginPath();ctx.roundRect((padding+offsetX)*pixels,(padding+offsetY)*pixels,width*pixels,height*pixels,.004*pixels);ctx.fill();
+   };
+   drawShadow(.014,.012,.018,.26);drawShadow(.005,.003,.005,.13);
+   const shadowTexture=new THREE.CanvasTexture(canvas);shadowTexture.colorSpace=THREE.SRGBColorSpace;textures.push(shadowTexture);
+   const shadow=new THREE.Mesh(new THREE.PlaneGeometry(shadowWidth,shadowHeight),new THREE.MeshBasicMaterial({map:shadowTexture,transparent:true,depthWrite:false,toneMapped:false}));
+   shadow.position.z=-.017;shadow.raycast=()=>{};frame.add(shadow);
    const texture=new THREE.TextureLoader(manager).load(`./assets/polaroids/${file}.png`,()=>{if(disposed)texture.dispose();});
    texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(texture);
    const photo=new THREE.Mesh(new THREE.PlaneGeometry(photoWidth,photoHeight),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));
-   photo.position.set(0,(bottom-rim)/2,.0046);frame.add(photo);
+   photo.position.set(0,(bottom-rim)/2,depth/2+.0006);frame.add(photo);
   }
   // Sheet metal shell, recessed back, dividers, top lip and individual feet.
   box(cabinet,4.65,3.65,.10,0,0,-.43,inside);
@@ -86,7 +100,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   action(sticker(cabinet,'./assets/stickers/portfolio-cover-full.webp',.60,.60*1080/1920,1.64,.26,.521),'open');
   // Six small paper prints follow the marked layout; only the top-left pair overlap.
   polaroid('cat',1200/783,.31,-1.99,.79,.07);
-  polaroid('duck',1,.28,-1.79,.62,-.085,.525);
+  polaroid('duck',1,.28,-1.79,.62,-.085,.550);
   polaroid('egg-flowers',1200/1736,.27,-1.43,-.23,.055);
   polaroid('sunset',928/1232,.28,1.56,.84,-.055);
   polaroid('starry-night',1200/750,.32,1.99,-.32,.085);
