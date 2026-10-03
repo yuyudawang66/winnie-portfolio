@@ -48,6 +48,20 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   }
   function action(obj:THREE.Object3D,id:string){obj.userData.action=id;return obj;}
   const photoPaper=mat('#fffaf2',0,.94,0);
+  const cornerTextures:THREE.Texture[]=[];
+  const cornerAtlas=new THREE.TextureLoader(manager).load('./assets/stickers/blue-photo-corners.png',()=>{
+   if(disposed){cornerAtlas.dispose();return;}cornerTextures.forEach(texture=>{texture.needsUpdate=true;});
+  });
+  cornerAtlas.colorSpace=THREE.SRGBColorSpace;cornerAtlas.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(cornerAtlas);
+  // One different motif per print, overlapping the white rim instead of the subject.
+  const photoCorners:Record<string,{tile:number;side:[number,number];size:number;angle:number}>={
+   cat:{tile:0,side:[-1,1],size:.155,angle:.18},
+   duck:{tile:2,side:[1,-1],size:.120,angle:-.12},
+   'egg-flowers':{tile:1,side:[1,1],size:.125,angle:.14},
+   sunset:{tile:5,side:[-1,1],size:.145,angle:.12},
+   'starry-night':{tile:4,side:[1,-1],size:.140,angle:-.20},
+   blossoms:{tile:3,side:[-1,-1],size:.150,angle:.20},
+  };
   function polaroid(file:string,aspect:number,width:number,x:number,y:number,angle:number,z=.520){
    const frame=new THREE.Group();frame.name=`Polaroid: ${file}`;frame.position.set(x,y,z);frame.rotation.z=angle;cabinet.add(frame);
    // Wider white borders and a rounded paper edge, keeping the complete image.
@@ -71,6 +85,12 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
    texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(texture);
    const photo=new THREE.Mesh(new THREE.PlaneGeometry(photoWidth,photoHeight),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));
    photo.position.set(0,(bottom-rim)/2,depth/2+.0006);frame.add(photo);
+   const decoration=photoCorners[file];
+   if(decoration){
+    const map=cornerAtlas.clone();map.repeat.set(1/3,1/2);map.offset.set((decoration.tile%3)/3,(1-Math.floor(decoration.tile/3))/2);cornerTextures.push(map);textures.push(map);
+    const corner=new THREE.Mesh(new THREE.PlaneGeometry(decoration.size,decoration.size),new THREE.MeshBasicMaterial({map,transparent:true,alphaTest:.04,depthWrite:false,toneMapped:false}));
+    corner.name=`Photo corner sticker: ${file}`;corner.position.set(decoration.side[0]*(width/2-.008),decoration.side[1]*(height/2-.020),depth/2+.004);corner.rotation.z=decoration.angle;corner.raycast=()=>{};frame.add(corner);
+   }
   }
   // Sheet metal shell, recessed back, dividers, top lip and individual feet.
   box(cabinet,4.65,3.65,.10,0,0,-.43,inside);
