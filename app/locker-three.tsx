@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createXuegaoBird} from './xuegao-bird';
+import {createArtistPalette} from './artist-palette';
 
 // Real, independently modelled surfaces: the shelves, door hinge and objects share world space.
 export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,onReady,onEntered}:{open:boolean;onOpen:()=>void;onExplore:(id:string)=>void;entrance:'loading'|'entering'|'ready';onProgress:(value:number)=>void;onReady:()=>void;onEntered:()=>void}){
@@ -24,7 +25,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   el.appendChild(renderer.domElement);renderer.domElement.setAttribute('aria-label','可旋转的三维储物柜，点击柜门打开');
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.1,100);
   camera.position.set(-4,2.7,10);const controls=new OrbitControls(camera,renderer.domElement);
-  controls.target.set(0,.35,0);controls.enableDamping=true;controls.enablePan=false;controls.enableZoom=false;
+  controls.target.set(.24,-.24,0);controls.enableDamping=true;controls.enablePan=false;controls.enableZoom=false;
   controls.minAzimuthAngle=-.75;controls.maxAzimuthAngle=.55;controls.minPolarAngle=1.08;controls.maxPolarAngle=1.65;
   scene.add(new THREE.HemisphereLight(0xffffff,0xbfe2f0,1.75));
   const sun=new THREE.DirectionalLight(0xffffff,3.15);sun.position.set(-3,7,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
@@ -130,6 +131,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   box(hinge,1.8,3.61,.085,-.9,0,0,doorMat,.04);vent(hinge,-.9,1.5,.06);vent(hinge,-.9,-1.35,.06);handle(hinge,-1.58,.06);
   const back=label(hinge,'ideas\nlive here.',1.17,1.1,-.9,.4,-.05,'#fff0c9','#5096a5',115);back.rotation.y=Math.PI;
   [-1.28,1.28].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.22,20),silver);c.position.set(.93,y,.5);c.castShadow=true;cabinet.add(c);});
+  const artProps=createArtistPalette();artProps.group.position.set(2.23,-2.11,.91);cabinet.add(artProps.group);textures.push(...artProps.textures);
   // A soft contact texture supplements the directional shadow without a background image.
   const sc=document.createElement('canvas');sc.width=sc.height=128;const sx=sc.getContext('2d')!;const grad=sx.createRadialGradient(64,64,4,64,64,64);grad.addColorStop(0,'rgba(38,69,82,.24)');grad.addColorStop(1,'rgba(38,69,82,0)');sx.fillStyle=grad;sx.fillRect(0,0,128,128);const st=new THREE.CanvasTexture(sc);textures.push(st);const contact=new THREE.Mesh(new THREE.PlaneGeometry(7,3.5),new THREE.MeshBasicMaterial({map:st,transparent:true,depthWrite:false}));contact.rotation.x=-Math.PI/2;contact.position.y=-2.115;scene.add(contact);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.14}));floor.rotation.x=-Math.PI/2;floor.position.y=-2.12;floor.receiveShadow=true;scene.add(floor);
@@ -139,11 +141,14 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   const onMove=(e:PointerEvent)=>{renderer.domElement.style.cursor=hit(e)?'pointer':'grab'};
   renderer.domElement.addEventListener('pointerdown',onDown);renderer.domElement.addEventListener('pointerup',onUp);renderer.domElement.addEventListener('pointermove',onMove);
   state.current.onProgress(60);
-  let mobile=false,entranceTime:number|null=null,entranceFinished=state.current.entrance==='ready';
+  let mobile=false,viewDistance=10.3,entranceTime:number|null=null,entranceFinished=state.current.entrance==='ready';
   const direction=new THREE.Vector3(-4,2.65,10).normalize();
-  const resize=()=>{const {width,height}=el.getBoundingClientRect();if(!width||!height)return;const viewDirection=camera.position.clone().sub(controls.target).normalize();mobile=width<650;renderer.setSize(width,height);controls.target.y=mobile?.05:.35;
-   if(entranceFinished)camera.position.copy(viewDirection).multiplyScalar(mobile?6.35:7.9).add(controls.target);
-   camera.aspect=width/height;camera.fov=mobile?44:35;camera.updateProjectionMatrix();};const ro=new ResizeObserver(resize);ro.observe(el);resize();
+  const resize=()=>{const {width,height}=el.getBoundingClientRect();if(!width||!height)return;const viewDirection=camera.position.clone().sub(controls.target).normalize();mobile=width<650;renderer.setSize(width,height);controls.target.set(mobile?.20:.24,mobile?-.40:-.24,0);
+   camera.aspect=width/height;camera.fov=mobile?44:35;
+   // Keep the floor props in frame, including narrow screens and the opposite viewing angle.
+   viewDistance=Math.max(mobile?6.9:10.3,(mobile?2.55:3.05)/(Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
+   if(entranceFinished)camera.position.copy(viewDirection).multiplyScalar(viewDistance).add(controls.target);
+   camera.updateProjectionMatrix();};const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let last=performance.now();
   controls.enabled=entranceFinished;
   renderer.setAnimationLoop((now)=>{
@@ -152,7 +157,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
     if(state.current.entrance==='entering'&&entranceTime===null)entranceTime=now;
     const t=state.current.entrance==='ready'||reduced?1:entranceTime===null?0:Math.min(1,Math.max(0,(now-entranceTime-180)/1900));
     // Quintic easing brings a genuine perspective-camera dolly to a soft stop.
-    const ease=t*t*t*(t*(t*6-15)+10),distance=(mobile?6.35:7.9)*(2.6-1.6*ease);
+    const ease=t*t*t*(t*(t*6-15)+10),distance=viewDistance*(2.6-1.6*ease);
     camera.position.copy(direction).multiplyScalar(distance).add(controls.target);camera.lookAt(controls.target);
     if(t===1&&state.current.entrance!=='loading'){entranceFinished=true;controls.enabled=true;state.current.onEntered();}
    }
@@ -168,7 +173,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
    if(!firstFrame){firstFrame=true;finishLoading();}
   });
   const loss=(e:Event)=>{e.preventDefault();setFailed(true);state.current.onEntered();};renderer.domElement.addEventListener('webglcontextlost',loss);
-  return()=>{disposed=true;clearTimeout(loadingDeadline);ro.disconnect();renderer.setAnimationLoop(null);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('webglcontextlost',loss);scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});textures.forEach(t=>t.dispose());renderer.dispose();renderer.domElement.remove();};
+  return()=>{disposed=true;clearTimeout(loadingDeadline);ro.disconnect();renderer.setAnimationLoop(null);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('webglcontextlost',loss);scene.traverse(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();if(o instanceof THREE.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});textures.forEach(t=>t.dispose());renderer.dispose();renderer.domElement.remove();};
  },[]);
  return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{!failed&&entrance==='ready'&&birdAnchor&&<button type="button" className="xuegao-trigger" style={{left:birdAnchor.x,top:birdAnchor.y,width:birdAnchor.width,height:birdAnchor.height}} aria-label="雪糕，紫伊莎牡丹鹦鹉" aria-describedby={birdGreeting?'xuegao-greeting':undefined} onPointerEnter={e=>{if(e.pointerType!=='touch')setBirdGreeting(true);}} onPointerLeave={e=>{if(e.pointerType!=='touch')setBirdGreeting(false);}} onFocus={()=>setBirdGreeting(true)} onBlur={()=>setBirdGreeting(false)} onClick={()=>setBirdGreeting(true)} onKeyDown={e=>{if(e.key==='Escape')setBirdGreeting(false);}}>{birdGreeting&&<span id="xuegao-greeting" className="xuegao-greeting" role="tooltip">你好我叫雪糕</span>}</button>}{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}</div>;
 }
