@@ -36,7 +36,7 @@ export function createArtistPalette(){
  boardGeometry.translate(0,0,-.022);
  const uv=boardGeometry.attributes.uv,positions=boardGeometry.attributes.position;
  for(let i=0;i<uv.count;i++)uv.setXY(i,(positions.getX(i)+.65)/1.3,positions.getY(i)/1.35);
- add(palette,boardGeometry,[woodFace,material('#b48b61',.8)]);
+ const board=add(palette,boardGeometry,[woodFace,material('#b48b61',.8)]);
 
  // Low raised, irregular paint smears rather than a row of uniform paint buttons.
  const paintColors=['#76946a','#67a298','#526b9c','#9f8abd','#779fc0'];
@@ -109,7 +109,16 @@ export function createArtistPalette(){
  const butterflyBody=add(butterfly,new THREE.CapsuleGeometry(.008,.072,4,8),material('#364b6c'));butterflyBody.rotation.z=-.15;butterflyBody.position.z=.012;
 
  palette.rotation.set(-.27,-.18,.12);palette.updateMatrixWorld(true);
- palette.position.y-=new THREE.Box3().setFromObject(palette).min.y;
+ // A rotated bounding box reaches below the curved wood; use its actual vertices.
+ palette.position.y-=new THREE.Box3().setFromObject(board,true).min.y;
+ palette.updateMatrixWorld(true);
+ const paletteContact=new THREE.Vector3(),vertex=new THREE.Vector3();let contactCount=0;
+ for(let i=0;i<positions.count;i++){
+  vertex.fromBufferAttribute(positions,i).applyMatrix4(board.matrixWorld);
+  if(vertex.y<.006){paletteContact.add(vertex);contactCount++;}
+ }
+ paletteContact.divideScalar(contactCount);
+ const brushContacts:THREE.Vector3[]=[];
 
  function brush(name:string,x:number,z:number,length:number,tilt:number,color:string,flat:boolean){
   const brushGroup=new THREE.Group();brushGroup.name=name;group.add(brushGroup);
@@ -124,15 +133,22 @@ export function createArtistPalette(){
    const profile=[new THREE.Vector2(.019,0),new THREE.Vector2(.026,.035),new THREE.Vector2(.018,.09),new THREE.Vector2(0,.15)];
    const bristles=add(brushGroup,new THREE.LatheGeometry(profile,20),material('#77543d',.91));bristles.position.y=handleHeight+.14;
   }
-  brushGroup.rotation.set(-.19,0,tilt);brushGroup.position.set(x,0,z);brushGroup.updateMatrixWorld(true);brushGroup.position.y-=new THREE.Box3().setFromObject(brushGroup).min.y;
+  brushGroup.rotation.set(-.19,0,tilt);brushGroup.position.set(x,0,z);brushGroup.updateMatrixWorld(true);brushGroup.position.y-=new THREE.Box3().setFromObject(brushGroup,true).min.y;
+  brushContacts.push(new THREE.Vector3(x,0,z));
  }
  brush('Round brush',.63,.02,1.53,.14,'#7d99b8',false);
  brush('Flat brush',.83,.08,1.32,.26,'#c5a57d',true);
 
- // A small grounding shadow remains soft even under the broad studio fill light.
- const shadowCanvas=document.createElement('canvas');shadowCanvas.width=128;shadowCanvas.height=64;
- const ctx=shadowCanvas.getContext('2d')!;ctx.scale(1,.5);const gradient=ctx.createRadialGradient(64,64,2,64,64,64);gradient.addColorStop(0,'rgba(51,68,71,.19)');gradient.addColorStop(1,'rgba(51,68,71,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
+ // Tight contact shadows sit directly beneath the real support points.
+ const shadowCanvas=document.createElement('canvas');shadowCanvas.width=shadowCanvas.height=128;
+ const ctx=shadowCanvas.getContext('2d')!;const gradient=ctx.createRadialGradient(64,64,0,64,64,64);
+ gradient.addColorStop(0,'rgba(40,55,59,.65)');gradient.addColorStop(.25,'rgba(40,55,59,.38)');gradient.addColorStop(1,'rgba(40,55,59,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
  const shadowTexture=new THREE.CanvasTexture(shadowCanvas);textures.push(shadowTexture);
- const shadow=new THREE.Mesh(new THREE.PlaneGeometry(1.7,.65),new THREE.MeshBasicMaterial({map:shadowTexture,transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.set(.17,.001,.035);shadow.raycast=()=>{};group.add(shadow);
+ function contactShadow(point:THREE.Vector3,width:number,depth:number){
+  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(width,depth),new THREE.MeshBasicMaterial({map:shadowTexture,transparent:true,depthWrite:false}));
+  shadow.rotation.x=-Math.PI/2;shadow.position.set(point.x,.002,point.z);shadow.raycast=()=>{};group.add(shadow);
+ }
+ contactShadow(paletteContact,.42,.17);
+ brushContacts.forEach(point=>contactShadow(point,.075,.075));
  return {group,textures};
 }

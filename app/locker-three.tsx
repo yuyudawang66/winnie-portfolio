@@ -131,7 +131,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   box(hinge,1.8,3.61,.085,-.9,0,0,doorMat,.04);vent(hinge,-.9,1.5,.06);vent(hinge,-.9,-1.35,.06);handle(hinge,-1.58,.06);
   const back=label(hinge,'ideas\nlive here.',1.17,1.1,-.9,.4,-.05,'#fff0c9','#5096a5',115);back.rotation.y=Math.PI;
   [-1.28,1.28].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.22,20),silver);c.position.set(.93,y,.5);c.castShadow=true;cabinet.add(c);});
-  const artProps=createArtistPalette();artProps.group.position.set(2.23,-2.11,.91);cabinet.add(artProps.group);textures.push(...artProps.textures);
+  const artProps=createArtistPalette();artProps.group.position.set(2.23,-2.12,.91);cabinet.add(artProps.group);textures.push(...artProps.textures);
   // A soft contact texture supplements the directional shadow without a background image.
   const sc=document.createElement('canvas');sc.width=sc.height=128;const sx=sc.getContext('2d')!;const grad=sx.createRadialGradient(64,64,4,64,64,64);grad.addColorStop(0,'rgba(38,69,82,.24)');grad.addColorStop(1,'rgba(38,69,82,0)');sx.fillStyle=grad;sx.fillRect(0,0,128,128);const st=new THREE.CanvasTexture(sc);textures.push(st);const contact=new THREE.Mesh(new THREE.PlaneGeometry(7,3.5),new THREE.MeshBasicMaterial({map:st,transparent:true,depthWrite:false}));contact.rotation.x=-Math.PI/2;contact.position.y=-2.115;scene.add(contact);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:.14}));floor.rotation.x=-Math.PI/2;floor.position.y=-2.12;floor.receiveShadow=true;scene.add(floor);
@@ -162,7 +162,10 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
     if(t===1&&state.current.entrance!=='loading'){entranceFinished=true;controls.enabled=true;state.current.onEntered();}
    }
    xuegao.animate(now/1000,reduced);
-   const target=state.current.open?2.05:0;hinge.rotation.y=THREE.MathUtils.damp(hinge.rotation.y,target,reduced?100:5,dt);const scale=mobile?.84:1;cabinet.scale.setScalar(scale);cabinet.position.y=mobile?-.3:0;controls.update();renderer.render(scene,camera);
+   const target=state.current.open?2.05:0;hinge.rotation.y=THREE.MathUtils.damp(hinge.rotation.y,target,reduced?100:5,dt);const scale=mobile?.84:1;cabinet.scale.setScalar(scale);cabinet.position.y=mobile?-.3:0;
+   // The cabinet scales on phones; its freestanding props still rest on the world floor.
+   artProps.group.position.y=(floor.position.y-cabinet.position.y)/scale;
+   controls.update();renderer.render(scene,camera);
    if(entranceFinished){
     const width=el.clientWidth,height=el.clientHeight;let left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
     for(const corner of birdCorners){projected.copy(corner).applyMatrix4(xuegao.bird.matrixWorld).project(camera);const x=(projected.x+1)*width/2,y=(1-projected.y)*height/2;left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
