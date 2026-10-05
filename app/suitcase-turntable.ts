@@ -6,7 +6,9 @@ export function createSuitcaseTurntable(){
  const group=new THREE.Group();group.name='Pink suitcase record player';
  const textures:THREE.Texture[]=[];
  const material=(color:string,roughness=.6,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
- const pink=material('#d58fa6',.79),lining=material('#d89bb0',.88),piping=material('#e2a7b9',.72);
+ const pink=material('#f52e8b',.70),lining=material('#f54493',.80),piping=material('#ff79b4',.64);
+ // A little colour fill keeps the reference's vivid rose pink inside the shaded shelf.
+ for(const m of [pink,lining,piping]){m.emissive.copy(m.color);m.emissiveIntensity=.14;}
  const chrome=material('#c8cece',.25,.7),darkChrome=material('#727d85',.32,.62);
  const rubber=material('#191a1c',.92),deck=material('#222226',.75),vinyl=material('#111218',.36);
  function mesh(parent:THREE.Object3D,geometry:THREE.BufferGeometry,m:THREE.Material){
@@ -71,7 +73,7 @@ export function createSuitcaseTurntable(){
   const ring=mesh(group,new THREE.TorusGeometry(radius,.0007,4,96),grooves);ring.rotation.x=Math.PI/2;ring.position.set(-.132,.230,.005);ring.castShadow=false;
  }
  cylinder(group,.054,.0018,-.132,.231,.005,material('#ead6c6',.89),64);
- cylinder(group,.019,.002,-.132,.232,.005,material('#d1a4b2',.82),40);
+ cylinder(group,.019,.002,-.132,.232,.005,material('#f54493',.82),40);
  cylinder(group,.005,.028,-.132,.246,.005,chrome,20);
  const spindleTip=mesh(group,new THREE.SphereGeometry(.005,12,8),chrome);spindleTip.position.set(-.132,.260,.005);
 
