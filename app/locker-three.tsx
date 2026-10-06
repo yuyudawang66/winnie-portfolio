@@ -17,7 +17,8 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch{setFailed(true);state.current.onProgress(100);state.current.onReady();state.current.onEntered();return;}
   let disposed=false,assetsLoaded=false,firstFrame=false,readySent=false;const textures:THREE.Texture[]=[];
   const finishLoading=()=>{if(!disposed&&!readySent&&assetsLoaded&&firstFrame){readySent=true;state.current.onProgress(100);state.current.onReady();}};
-  const manager=new THREE.LoadingManager();manager.onProgress=(_,loaded,total)=>{if(!disposed)state.current.onProgress(60+Math.round(loaded/total*25));};manager.onLoad=()=>{assetsLoaded=true;finishLoading();};
+  // Late textures must not lower 100% after the loading deadline has released the scene.
+  const manager=new THREE.LoadingManager();manager.onProgress=(_,loaded,total)=>{if(!disposed&&!readySent)state.current.onProgress(60+Math.round(loaded/total*25));};manager.onLoad=()=>{assetsLoaded=true;finishLoading();};
   // A failed image must not leave the visitor trapped on the welcome screen.
   const loadingDeadline=window.setTimeout(()=>{assetsLoaded=true;finishLoading();},8000);
   state.current.onProgress(12);
