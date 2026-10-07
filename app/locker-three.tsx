@@ -6,6 +6,7 @@ import {createXuegaoBird} from './xuegao-bird';
 import {createArtistPalette} from './artist-palette';
 import {createSuitcaseTurntable} from './suitcase-turntable';
 import {createAboutCharm} from './about-charm';
+import {createProjectBag,createIceCreamClock} from './project-bag';
 
 // Real, independently modelled surfaces: the shelves, door hinge and objects share world space.
 export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,onReady,onEntered}:{open:boolean;onOpen:()=>void;onExplore:(id:string)=>void;entrance:'loading'|'entering'|'ready';onProgress:(value:number)=>void;onReady:()=>void;onEntered:()=>void}){
@@ -13,6 +14,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
  const[failed,setFailed]=useState(false); state.current={open,onOpen,onExplore,entrance,onProgress,onReady,onEntered};
  const[birdGreeting,setBirdGreeting]=useState(false);
  const[birdAnchor,setBirdAnchor]=useState<{x:number;y:number;width:number;height:number}|null>(null);
+ const[bagAnchor,setBagAnchor]=useState<{x:number;y:number;width:number;height:number}|null>(null);
  const[aboutAnchor,setAboutAnchor]=useState<{x:number;y:number;width:number;height:number}|null>(null);
  useEffect(()=>{
   const el=host.current!; let renderer:THREE.WebGLRenderer;
@@ -113,8 +115,9 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   const bookColors=['#cabee4','#fcdfb4','#fff8e4','#dfad99','#acd4cc','#e7bfcb'];
   bookColors.forEach((c,i)=>{const h=.67+(i%3)*.085,y=.685+h/2;const b=box(cabinet,.16,h,.38,-.7+i*.2,y,-.07,mat(c,0,.8),.008);b.rotation.z=i===0?.10:0;label(cabinet,['IDEAS','UI','VISUAL','IP','TYPE','2026'][i],.115,.42,-.7+i*.2,y,.125,c,'#526c79',90)});
   const orb=new THREE.Mesh(new THREE.SphereGeometry(.17,32,24),mat('#f4cd8f',.18,.3));orb.position.set(.68,.848,.08);orb.castShadow=true;cabinet.add(orb);
-  const projects=[['ip','IP DESIGN','#94e3e5'],['ui','UI / UX','#a9beef'],['brand','BRAND','#ffe2a0'],['campaign','CAMPAIGN','#f4b1d0']];
-  projects.forEach(([id,name,color],i)=>{const g=action(new THREE.Group(),'project/'+id);g.position.set(-.46+(i%2)*.92,.18-Math.floor(i/2)*.59,.18);cabinet.add(g);box(g,.77,.34,.12,0,0,0,mat(color,0,.65),.028);box(g,.28,.08,.08,-.19,.19,-.01,mat(color,0,.65),.02);label(g,name,.68,.23,0,0,.065,color,'#375165',72);});
+  const projectBag=createProjectBag();action(projectBag.group,'works');projectBag.group.position.set(-.27,-.5925,.055);cabinet.add(projectBag.group);textures.push(...projectBag.textures);
+  const clock=createIceCreamClock();clock.group.position.set(.48,.08,-.36);clock.group.scale.setScalar(.88);cabinet.add(clock.group);textures.push(...clock.textures);
+  const bagCorners=[new THREE.Vector3(-.50,.025,.24),new THREE.Vector3(.50,.025,.24),new THREE.Vector3(-.50,.42,.24),new THREE.Vector3(.50,.42,.24)];let previousBagAnchor='';
   const recordPlayer=createSuitcaseTurntable();const turntable=action(recordPlayer.group,'life');turntable.position.set(-.32,-1.8525,.085);cabinet.add(turntable);textures.push(...recordPlayer.textures);
   const note=action(new THREE.Group(),'message');note.position.set(.48,-1.45,.2);note.rotation.z=-.09;cabinet.add(note);box(note,.58,.52,.025,0,0,0,mat('#fff0a9',0,.9));label(note,'留一张\n小纸条 ↗',.52,.43,0,0,.016,'#fff0a9','#746445',92);
   function vent(parent:THREE.Object3D,x:number,y:number,z:number){for(let j=0;j<4;j++){box(parent,.43,.052,.033,x,y-j*.085,z,edge,.023);box(parent,.42,.026,.04,x,y-j*.085+.014,z+.009,doorMat,.01);}}
@@ -133,7 +136,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   const hinge=action(new THREE.Group(),'open');hinge.position.set(.92,0,.5);cabinet.add(hinge);
   box(hinge,1.8,3.61,.085,-.9,0,0,doorMat,.04);vent(hinge,-.9,1.5,.06);vent(hinge,-.9,-1.35,.06);handle(hinge,-1.58,.06);
   const aboutCharm=createAboutCharm();action(aboutCharm.group,'about');aboutCharm.group.position.set(-.9,1.14,-.058);aboutCharm.group.rotation.y=Math.PI;aboutCharm.group.scale.z=.55;hinge.add(aboutCharm.group);textures.push(...aboutCharm.textures);
-  const aboutCorners=[new THREE.Vector3(-.37,-.12,0),new THREE.Vector3(.37,-.12,0),new THREE.Vector3(-.37,.12,0),new THREE.Vector3(.37,.12,0)];let previousAboutAnchor='';
+  const aboutCorners=[new THREE.Vector3(-.29,-.22,0),new THREE.Vector3(.29,-.22,0),new THREE.Vector3(-.29,.22,0),new THREE.Vector3(.29,.22,0)];let previousAboutAnchor='';
   [-1.28,1.28].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.22,20),silver);c.position.set(.93,y,.5);c.castShadow=true;cabinet.add(c);});
   const artProps=createArtistPalette();artProps.group.position.set(2.23,-2.12,.91);cabinet.add(artProps.group);textures.push(...artProps.textures);
   // A soft contact texture supplements the directional shadow without a background image.
@@ -182,12 +185,20 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
      const w=Math.round(Math.max(44,right-left)),h=Math.round(Math.max(44,bottom-top));
      const anchor={x:Math.round((left+right-w)/2),y:Math.round((top+bottom-h)/2),width:w,height:h},key=`${anchor.x},${anchor.y},${w},${h}`;
      if(key!==previousAboutAnchor){previousAboutAnchor=key;setAboutAnchor(anchor);}
-    }else if(previousAboutAnchor){previousAboutAnchor='';setAboutAnchor(null);}
+     let bagLeft=Infinity,bagTop=Infinity,bagRight=-Infinity,bagBottom=-Infinity;
+     for(const corner of bagCorners){projected.copy(corner).applyMatrix4(projectBag.group.matrixWorld).project(camera);const x=(projected.x+1)*width/2,y=(1-projected.y)*height/2;bagLeft=Math.min(bagLeft,x);bagRight=Math.max(bagRight,x);bagTop=Math.min(bagTop,y);bagBottom=Math.max(bagBottom,y);}
+     const bw=Math.round(Math.max(44,bagRight-bagLeft)),bh=Math.round(Math.max(44,bagBottom-bagTop));
+     const bagAnchor={x:Math.round((bagLeft+bagRight-bw)/2),y:Math.round((bagTop+bagBottom-bh)/2),width:bw,height:bh},bagKey=`${bagAnchor.x},${bagAnchor.y},${bw},${bh}`;
+     if(bagKey!==previousBagAnchor){previousBagAnchor=bagKey;setBagAnchor(bagAnchor);}
+    }else{
+     if(previousAboutAnchor){previousAboutAnchor='';setAboutAnchor(null);}
+     if(previousBagAnchor){previousBagAnchor='';setBagAnchor(null);}
+    }
    }
    if(!firstFrame){firstFrame=true;finishLoading();}
   });
   const loss=(e:Event)=>{e.preventDefault();setFailed(true);state.current.onEntered();};renderer.domElement.addEventListener('webglcontextlost',loss);
   return()=>{disposed=true;clearTimeout(loadingDeadline);ro.disconnect();renderer.setAnimationLoop(null);controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('pointermove',onMove);renderer.domElement.removeEventListener('webglcontextlost',loss);scene.traverse(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();if(o instanceof THREE.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});textures.forEach(t=>t.dispose());renderer.dispose();renderer.domElement.remove();};
  },[]);
- return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{!failed&&entrance==='ready'&&birdAnchor&&<button type="button" className="xuegao-trigger" style={{left:birdAnchor.x,top:birdAnchor.y,width:birdAnchor.width,height:birdAnchor.height}} aria-label="雪糕，紫伊莎牡丹鹦鹉" aria-describedby={birdGreeting?'xuegao-greeting':undefined} onPointerEnter={e=>{if(e.pointerType!=='touch')setBirdGreeting(true);}} onPointerLeave={e=>{if(e.pointerType!=='touch')setBirdGreeting(false);}} onFocus={()=>setBirdGreeting(true)} onBlur={()=>setBirdGreeting(false)} onClick={()=>setBirdGreeting(true)} onKeyDown={e=>{if(e.key==='Escape')setBirdGreeting(false);}}>{birdGreeting&&<span id="xuegao-greeting" className="xuegao-greeting" role="tooltip">你好我叫雪糕</span>}</button>}{!failed&&entrance==='ready'&&open&&aboutAnchor&&<button type="button" className="about-charm-trigger" style={{left:aboutAnchor.x,top:aboutAnchor.y,width:aboutAnchor.width,height:aboutAnchor.height}} aria-label="关于我，打开个人介绍" onClick={()=>state.current.onExplore('about')}/>}{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}</div>;
+ return <div className="locker-webgl-wrap"><div className="locker-webgl" ref={host}/>{!failed&&entrance==='ready'&&birdAnchor&&<button type="button" className="xuegao-trigger" style={{left:birdAnchor.x,top:birdAnchor.y,width:birdAnchor.width,height:birdAnchor.height}} aria-label="雪糕，紫伊莎牡丹鹦鹉" aria-describedby={birdGreeting?'xuegao-greeting':undefined} onPointerEnter={e=>{if(e.pointerType!=='touch')setBirdGreeting(true);}} onPointerLeave={e=>{if(e.pointerType!=='touch')setBirdGreeting(false);}} onFocus={()=>setBirdGreeting(true)} onBlur={()=>setBirdGreeting(false)} onClick={()=>setBirdGreeting(true)} onKeyDown={e=>{if(e.key==='Escape')setBirdGreeting(false);}}>{birdGreeting&&<span id="xuegao-greeting" className="xuegao-greeting" role="tooltip">你好我叫雪糕</span>}</button>}{!failed&&entrance==='ready'&&open&&aboutAnchor&&<button type="button" className="about-charm-trigger" style={{left:aboutAnchor.x,top:aboutAnchor.y,width:aboutAnchor.width,height:aboutAnchor.height}} aria-label="关于我，打开个人介绍" onClick={()=>state.current.onExplore('about')}/>}{!failed&&entrance==='ready'&&open&&bagAnchor&&<button type="button" className="project-bag-trigger" style={{left:bagAnchor.x,top:bagAnchor.y,width:bagAnchor.width,height:bagAnchor.height}} aria-label="打开作品包，查看四个设计项目" onClick={()=>state.current.onExplore('works')}><span className="project-bag-hint">打开作品包 ↗</span></button>}{failed&&<div className="locker-webgl-fallback">当前浏览器暂不支持 3D 场景，请使用下方按钮浏览作品。</div>}</div>;
 }
