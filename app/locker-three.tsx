@@ -116,11 +116,11 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   const bookColors=['#cabee4','#fcdfb4','#fff8e4','#dfad99','#acd4cc','#e7bfcb'];
   bookColors.forEach((c,i)=>{const h=.67+(i%3)*.085,y=.685+h/2;const b=box(cabinet,.16,h,.38,-.7+i*.2,y,-.07,mat(c,0,.8),.008);b.rotation.z=i===0?.10:0;label(cabinet,['IDEAS','UI','VISUAL','IP','TYPE','2026'][i],.115,.42,-.7+i*.2,y,.125,c,'#526c79',90)});
   const orb=new THREE.Mesh(new THREE.SphereGeometry(.17,32,24),mat('#f4cd8f',.18,.3));orb.position.set(.68,.848,.08);orb.castShadow=true;cabinet.add(orb);
-  const projectComputer=createProjectComputer();action(projectComputer.group,'works');projectComputer.group.position.set(-.29,-.5925,.01);cabinet.add(projectComputer.group);textures.push(...projectComputer.textures);
-  const clock=createIceCreamClock();clock.group.position.set(.48,.08,-.36);clock.group.scale.setScalar(.88);cabinet.add(clock.group);textures.push(...clock.textures);
+  const projectComputer=createProjectComputer();action(projectComputer.group,'works');projectComputer.group.position.set(-.29,-.5925,.01);projectComputer.group.scale.set(1.16,1.16,1);cabinet.add(projectComputer.group);textures.push(...projectComputer.textures);
+  const clock=createIceCreamClock();clock.group.position.set(.56,.08,-.36);clock.group.scale.setScalar(.88);cabinet.add(clock.group);textures.push(...clock.textures);
   const computerCorners=[new THREE.Vector3(-.43,.18,.14),new THREE.Vector3(.43,.18,.14),new THREE.Vector3(-.43,.79,.14),new THREE.Vector3(.43,.79,.14)];let previousComputerAnchor='';
-  const recordPlayer=createSuitcaseTurntable();const turntable=action(recordPlayer.group,'life');turntable.position.set(-.32,-1.8525,.085);cabinet.add(turntable);textures.push(...recordPlayer.textures);
-  const note=action(new THREE.Group(),'message');note.position.set(.48,-1.45,.2);note.rotation.z=-.09;cabinet.add(note);box(note,.58,.52,.025,0,0,0,mat('#fff0a9',0,.9));label(note,'留一张\n小纸条 ↗',.52,.43,0,0,.016,'#fff0a9','#746445',92);
+  const recordPlayer=createSuitcaseTurntable();const turntable=action(recordPlayer.group,'life');turntable.position.set(-.32,-1.8525,.085);turntable.scale.set(1.2,1.2,1);cabinet.add(turntable);textures.push(...recordPlayer.textures);
+  const note=action(new THREE.Group(),'message');note.position.set(.54,-1.45,.2);note.rotation.z=-.09;cabinet.add(note);box(note,.58,.52,.025,0,0,0,mat('#fff0a9',0,.9));label(note,'留一张\n小纸条 ↗',.52,.43,0,0,.016,'#fff0a9','#746445',92);
   function vent(parent:THREE.Object3D,x:number,y:number,z:number){for(let j=0;j<4;j++){box(parent,.43,.052,.033,x,y-j*.085,z,edge,.023);box(parent,.42,.026,.04,x,y-j*.085+.014,z+.009,doorMat,.01);}}
   function handle(parent:THREE.Object3D,x:number,z:number){box(parent,.16,.48,.045,x,-.13,z,silver,.045);box(parent,.055,.28,.10,x,-.12,z+.053,edge,.024);}
   [-1.64,1.64].forEach((x,i)=>{box(cabinet,1.28,3.62,.08,x,0,.46,doorMat,.04);vent(cabinet,x,1.51,.52);vent(cabinet,x,-1.35,.52);handle(cabinet,x-.45,.52);label(cabinet,`0${i===0?1:3} / WINNIE`,.77,.08,x,1.71,.511,'#d1e4ec','#567f93',45);});

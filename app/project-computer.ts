@@ -13,16 +13,16 @@ export function createProjectComputer(){
  softBox(group,.57,.048,.31,0,.024,-.072,ivory,.023);
  softBox(group,.24,.115,.15,0,.099,-.09,rim,.045);
  const monitor=new THREE.Group();monitor.name='Rounded CRT monitor';monitor.position.set(0,.148,-.052);monitor.rotation.x=-.045;group.add(monitor);
- softBox(monitor,.93,.660,.366,0,.336,-.036,ivory,.086);
+ softBox(monitor,.93,.660,.416,0,.336,-.061,ivory,.108);
  // Slightly smaller rear housing provides the characteristic deep CRT silhouette.
- softBox(monitor,.71,.50,.15,0,.346,-.189,rim,.060);
+ softBox(monitor,.71,.50,.15,0,.346,-.213,rim,.069);
  for(const side of [-1,1])for(let i=0;i<5;i++){
   softBox(monitor,.006,.058,.008,side*.453,.32+i*.034,-.085,dark,.003);
  }
  // A real opening in the bezel surrounds the inset curved screen.
- const bezelShape=roundedRect(.872,.593,.069),screenOpening=roundedRect(.753,.463,.055);bezelShape.holes.push(screenOpening);
- const bezel=softPlate(monitor,bezelShape,ivory,.040,.012);bezel.position.set(0,.357,.142);
- const screenBack=softPlate(monitor,roundedRect(.770,.480,.060),softMaterial('#777b80'),.020,.008);screenBack.position.set(0,.357,.139);
+ const bezelShape=roundedRect(.872,.593,.087),screenOpening=roundedRect(.753,.463,.068);bezelShape.holes.push(screenOpening);
+ const bezel=softPlate(monitor,bezelShape,ivory,.060,.022);bezel.position.set(0,.357,.142);
+ const screenBack=softPlate(monitor,roundedRect(.770,.480,.072),softMaterial('#777b80'),.020,.008);screenBack.position.set(0,.357,.150);
 
  // Text stays on the actual glass, with a restrained glow and a tiny desktop status bar.
  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=640;const ctx=canvas.getContext('2d')!;
@@ -34,11 +34,11 @@ export function createProjectComputer(){
  // The highlight and curvature give the glass volume without making the screen look glossy plastic.
  const sheen=ctx.createRadialGradient(260,20,10,260,20,580);sheen.addColorStop(0,'rgba(234,244,250,.09)');sheen.addColorStop(1,'rgba(234,244,250,0)');ctx.fillStyle=sheen;ctx.fillRect(0,0,1024,640);
  const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;textures.push(map);
- const width=.741,height=.451,radius=.052,positions:number[]=[],uvs:number[]=[],indices:number[]=[],nx=40,ny=28;
+ const width=.741,height=.451,radius=.063,positions:number[]=[],uvs:number[]=[],indices:number[]=[],nx=40,ny=28;
  for(let j=0;j<=ny;j++){
   const y=(j/ny-.5)*height,dy=Math.max(0,Math.abs(y)-(height/2-radius)),halfWidth=width/2-radius+Math.sqrt(Math.max(0,radius*radius-dy*dy));
   for(let i=0;i<=nx;i++){
-   const x=(i/nx*2-1)*halfWidth,z=.158+.024*(1-(x/(width/2))**2)*(1-(y/(height/2))**2);
+   const x=(i/nx*2-1)*halfWidth,z=.174+.031*(1-(x/(width/2))**2)*(1-(y/(height/2))**2);
    positions.push(x,y+.357,z);uvs.push(x/width+.5,y/height+.5);
   }
  }

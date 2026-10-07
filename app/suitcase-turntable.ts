@@ -33,15 +33,15 @@ export function createSuitcaseTurntable(){
  }
  // Plump matte case and cream rolled rim, echoing the palette's soft sculpted petals.
  for(const x of [-.323,.323])for(const z of [-.177,.177])box(group,.062,.028,.059,x,.014,z,rubber,.013);
- box(group,.84,.196,.54,0,.124,0,pink,.051);
+ box(group,.84,.196,.54,0,.124,0,pink,.065);
  const rim=panel(group,.790,.483,.039,.066,0,.220,0,piping);rim.rotation.x=-Math.PI/2;
  const deckInset=panel(group,.749,.445,.018,.052,0,.237,0,deck);deckInset.rotation.x=-Math.PI/2;
 
  // The lid is built around its real rear hinge and leans back within the shelf depth.
  const lid=new THREE.Group();lid.name='Open rounded cushion lid';lid.position.set(0,.216,-.241);lid.rotation.x=-.12;group.add(lid);
- panel(lid,.82,.446,.074,.078,0,.223,0,pink);
- panel(lid,.756,.382,.031,.066,0,.227,.033,piping);
- panel(lid,.715,.341,.034,.061,0,.230,.051,lining);
+ panel(lid,.82,.446,.074,.098,0,.223,0,pink);
+ panel(lid,.756,.382,.031,.083,0,.227,.033,piping);
+ panel(lid,.715,.341,.034,.076,0,.230,.051,lining);
  for(const side of [-1,1]){
   const hinge=cylinder(group,.018,.080,side*.266,.221,-.243,chrome);hinge.rotation.z=Math.PI/2;
  }
@@ -86,7 +86,7 @@ export function createSuitcaseTurntable(){
  // Cream oval speaker surrounds and recessed rounded slots replace sharp metal grilles.
  const speakerInset=material('#b7a992',.82);
  for(const x of [-.282,.282]){
-  panel(group,.177,.103,.018,.040,x,.126,.261,cream);
+  panel(group,.177,.112,.018,.045,x,.126,.261,cream);
   panel(group,.148,.077,.008,.030,x,.126,.272,speakerInset);
   for(let i=-2;i<=2;i++){
    const height=i===-2||i===2?.041:.057;
@@ -99,7 +99,7 @@ export function createSuitcaseTurntable(){
   panel(group,.049,.047,.015,.019,x,.145,.267,chrome);
   tube(group,[new THREE.Vector3(x,.150,.277),new THREE.Vector3(x,.105,.303),new THREE.Vector3(x*.88,.058,.330)],.009,chrome);
  }
- box(group,.224,.056,.048,0,.047,.325,piping,.023);
+ box(group,.230,.063,.051,0,.047,.325,piping,.024);
  panel(group,.044,.058,.017,.017,0,.162,.270,chrome);
  panel(group,.025,.034,.010,.010,0,.164,.283,cream);
 
