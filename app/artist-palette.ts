@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {createPaletteFlowers} from './palette-flowers';
 
 // A small freestanding still life, in the same world space as the cabinet.
 export function createArtistPalette(){
@@ -60,46 +61,8 @@ export function createArtistPalette(){
  paintSmear(.24,.22,.23,.145,paintColors[3],.21);
  paintSmear(-.15,.23,.10,.14,paintColors[4],-.22);
 
- // Curved petal geometry is instanced so the flower clusters stay light to render.
- const petalGeometry=new THREE.SphereGeometry(1,16,12);
- const pp=petalGeometry.attributes.position;
- for(let i=0;i<pp.count;i++){
-  const x=pp.getX(i),y=pp.getY(i),z=pp.getZ(i);
-  pp.setXYZ(i,x*(.80+.20*y),y,z+.22*y*y);
- }
- petalGeometry.computeVertexNormals();
- type Oval={x:number;y:number;z:number;sx:number;sy:number;sz:number;rotation:number;color:string};
- const petals:Oval[]=[],centers:Oval[]=[],leaves:Oval[]=[];
- function flower(x:number,y:number,z:number,radius:number,color:string,count:number,rotation:number){
-  for(let i=0;i<count;i++){
-   const a=rotation+i/count*Math.PI*2;
-   petals.push({x:x+Math.sin(a)*radius*.43,y:y+Math.cos(a)*radius*.43,z:z+.003*(i%2),sx:radius*(count===5?.43:.29),sy:radius*.64,sz:radius*.13,rotation:-a,color});
-  }
-  centers.push({x,y,z:z+.019,sx:radius*.18,sy:radius*.18,sz:radius*.10,rotation:0,color:count===5?'#e3ba78':'#ecd694'});
-  for(let i=0;i<5;i++){const a=i/5*Math.PI*2;centers.push({x:x+Math.sin(a)*radius*.16,y:y+Math.cos(a)*radius*.16,z:z+.023,sx:radius*.038,sy:radius*.038,sz:radius*.04,rotation:0,color:'#f3ddb2'});}
- }
- const creamFlowers=[[-.29,.98,.145],[-.08,1.15,.15],[.09,.96,.15],[-.39,.82,.11],[.35,.93,.115]];
- creamFlowers.forEach(([x,y,r],i)=>flower(x,y,.065+(i%2)*.018,r,i%2?'#fff0ca':'#f8f3da',5,.23+i*.67));
- const blueClusters=[[-.36,1.13],[-.04,.91],[.22,1.16],[.42,1.08]];
- blueClusters.forEach(([x,y],cluster)=>{
-  for(let i=0;i<5;i++){
-   const a=i*2.4+cluster,r=i===0?0:.058;
-   flower(x+Math.cos(a)*r,y+Math.sin(a)*r,.065+i*.008,.055,['#a4c4e5','#86aed7','#bbd0e9'][i%3],5,a);
-  }
- });
- for(const [x,y,r] of [[-.43,1.04,-.8],[-.18,1.24,.5],[.34,1.19,-.7],[.47,.97,-1.1],[.20,.91,.8],[-.42,.74,.65]]){
-  leaves.push({x,y,z:.042,sx:.031,sy:.099,sz:.008,rotation:r,color:'#9aa777'});
- }
- const matrix=new THREE.Matrix4(),quaternion=new THREE.Quaternion(),position=new THREE.Vector3(),scale=new THREE.Vector3();
- function instances(name:string,items:Oval[],geometry:THREE.BufferGeometry,roughness:number){
-  const mesh=new THREE.InstancedMesh(geometry,material('#ffffff',roughness),items.length);mesh.name=name;
-  items.forEach((item,i)=>{
-   position.set(item.x,item.y,item.z);scale.set(item.sx,item.sy,item.sz);quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),item.rotation);matrix.compose(position,quaternion,scale);
-   mesh.setMatrixAt(i,matrix);mesh.setColorAt(i,new THREE.Color(item.color));
-  });
-  mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=true;mesh.receiveShadow=true;palette.add(mesh);
- }
- instances('Sage leaves',leaves,petalGeometry,.85);instances('Blue and ivory flower petals',petals,petalGeometry,.78);instances('Flower stamens',centers,new THREE.SphereGeometry(1,10,8),.72);
+ // Shared original flower cluster; its palette colors and layout stay unchanged.
+ palette.add(createPaletteFlowers());
 
  // A tiny folded blue butterfly rests on the top edge, echoing the reference.
  const butterfly=new THREE.Group();butterfly.position.set(.22,1.29,.055);butterfly.rotation.z=-.27;palette.add(butterfly);

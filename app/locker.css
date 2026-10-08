@@ -28,3 +28,15 @@ body{background:#f1f9f9;color:#294957}button:focus-visible,a:focus-visible{outli
 .project-selection-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:24px 0 30px}.project-selection-card{display:block;overflow:hidden;padding:12px 12px 17px;background:#fffaf7;border:1px solid #e8e5df;border-radius:18px;box-shadow:0 5px 16px #648b9a0b;transition:transform .18s,box-shadow .18s}.project-selection-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px #648b9a20}.project-selection-card .project-cover{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:10px;background:#f4f0e9}.project-selection-card>div{display:flex;align-items:center;justify-content:space-between;margin-top:14px;color:#839499;font-size:10px;letter-spacing:1px}.project-selection-card h3{margin:8px 0 0;color:#456574;font-size:17px;font-weight:500;letter-spacing:.3px}@media(max-width:540px){.project-selection-grid{gap:12px}.project-selection-card{padding:8px 8px 12px;border-radius:14px}.project-selection-card h3{font-size:14px}.project-selection-card>div{font-size:9px;letter-spacing:0}}@media(prefers-reduced-motion:reduce){.project-selection-card,.project-computer-hint{transition:none}}
 
 @media(max-width:850px){.project-selection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Pointer input stays on the real 3D surfaces; projected buttons support Tab and screen readers. */
+.locker-prop-trigger{position:absolute;z-index:4;margin:0;padding:0;border:0;border-radius:14px;background:transparent;pointer-events:none}
+.locker-prop-trigger:focus-visible{outline:2px dashed #b787a0;outline-offset:4px}
+.locker-prop-hint{position:absolute;z-index:6;translate:-50% -100%;pointer-events:none;max-width:calc(100% - 24px);white-space:nowrap}
+.locker-prop-hint.is-below{translate:-50% 0}
+.locker-prop-hint span{position:relative;display:block;padding:9px 15px;border:1px solid #e5d3d9;border-radius:22px;background:#fffcf7f5;color:#815f73;box-shadow:0 6px 18px #506b7e1a,inset 0 1px 0 #fff;font-size:12px;font-weight:500;letter-spacing:.3px;animation:prop-hint-in .2s ease-out both}
+.locker-prop-hint span:after{content:"";position:absolute;left:calc(50% - 4px);bottom:-5px;width:8px;height:8px;background:#fffcf7;border-right:1px solid #e5d3d9;border-bottom:1px solid #e5d3d9;transform:rotate(45deg)}
+.locker-prop-hint.is-below span:after{top:-5px;bottom:auto;transform:rotate(225deg)}
+@keyframes prop-hint-in{from{opacity:0;transform:translateY(4px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:700px){.locker-prop-hint span{padding:8px 12px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.locker-prop-hint span{animation:none}}
