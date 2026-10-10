@@ -6,6 +6,7 @@ import {createXuegaoBird} from './xuegao-bird';
 import {createArtistPalette} from './artist-palette';
 import {createSuitcaseTurntable} from './suitcase-turntable';
 import {createAboutCharm} from './about-charm';
+import {createDoorStickers} from './door-stickers';
 import {createProjectComputer} from './project-computer';
 import {createIceCreamClock} from './ice-cream-clock';
 import {createKittyCup} from './shelf-accessories';
@@ -144,6 +145,7 @@ export default function LockerThree({open,onOpen,onExplore,entrance,onProgress,o
   const doorPanel=new THREE.Group();doorPanel.position.x=-.9;hinge.add(doorPanel);
   box(doorPanel,1.8,3.61,.085,0,0,0,doorMat,.04);vent(doorPanel,0,1.5,.06);vent(doorPanel,0,-1.35,.06);handle(doorPanel,-.68,.06);
   const aboutCharm=createAboutCharm();action(aboutCharm.group,'about');aboutCharm.group.position.set(0,1.14,-.058);aboutCharm.group.rotation.y=Math.PI;aboutCharm.group.scale.z=.55;doorPanel.add(aboutCharm.group);textures.push(...aboutCharm.textures);
+  const doorStickers=createDoorStickers(manager,Math.min(8,renderer.capabilities.getMaxAnisotropy()),()=>disposed);doorStickers.group.position.z=-.047;doorStickers.group.rotation.y=Math.PI;doorPanel.add(doorStickers.group);textures.push(...doorStickers.textures);
   [-1.28,1.28].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.22,20),silver);c.position.set(.93,y,.5);c.castShadow=true;cabinet.add(c);});
   const artProps=createArtistPalette();artProps.group.position.set(2.23,-2.12,.91);cabinet.add(artProps.group);textures.push(...artProps.textures);
   // A soft contact texture supplements the directional shadow without a background image.

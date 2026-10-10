@@ -24,6 +24,10 @@ Prompt used:
 
 The earlier cropped motifs are no longer referenced by the locker scene.
 
+## Inner-door stickers — 2026-10-09
+
+The six PNGs in `public/assets/stickers/door/` are unchanged copies of the user's supplied transparent artwork. `app/door-stickers.ts` trims only transparent margins via texture UVs and positions them around the About Me pendant according to the supplied placement mockup. The two girl illustrations and teddy use a thin white alpha-based material outline; the other three keep their existing white edges. All decals are attached to the inner door face and follow its hinge without adding independent click targets.
+
 ## Placement refinement — 2026-10-02
 
 Each of the four cat tiles appears once. The decal planes are now 0.38–0.43 scene units wide. The left-door introduction poster and three duplicate cats were removed. Gesture instructions and the open/close button share one compact control group at the foot of the scene.
