@@ -30,7 +30,7 @@ export function createProjectComputer(){
  ctx.fillStyle='rgba(234,231,240,.20)';ctx.fillRect(90,118,844,2);
  for(const [i,c]of ['#e6bccb','#e6d3ad','#b9d8d2'].entries()){ctx.fillStyle=c;ctx.beginPath();ctx.arc(105+i*32,82,7,0,Math.PI*2);ctx.fill();}
  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='500 146px "PingFang SC", "Microsoft YaHei", sans-serif';ctx.fillStyle='#f8eaf2';ctx.shadowColor='rgba(222,175,211,.58)';ctx.shadowBlur=18;ctx.fillText('个人项目',512,312);ctx.shadowBlur=0;
- ctx.font='400 27px ui-monospace, monospace';ctx.fillStyle='#b8c5ce';ctx.fillText('SELECTED WORK  /  01—04',512,459);
+ ctx.font='400 27px ui-monospace, monospace';ctx.fillStyle='#b8c5ce';ctx.fillText('SELECTED WORK  /  01—02',512,459);
  // The highlight and curvature give the glass volume without making the screen look glossy plastic.
  const sheen=ctx.createRadialGradient(260,20,10,260,20,580);sheen.addColorStop(0,'rgba(234,244,250,.09)');sheen.addColorStop(1,'rgba(234,244,250,0)');ctx.fillStyle=sheen;ctx.fillRect(0,0,1024,640);
  const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;textures.push(map);
